@@ -17,6 +17,30 @@
     ],
     "main": "./extension",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "rememberall",
+                    "title": "Rememberall",
+                    "icon": "resources/rememberall-container.svg"
+                }
+            ]
+        },
+        "views": {
+            "explorer": [
+                {
+                    "id": "rememberall-explorer",
+                    "name": "Rememberall",
+                    "when": "rememberall-in-explorer"
+                }
+            ],
+            "rememberall": [
+                {
+                    "id": "rememberall",
+                    "name": "Rememberall"
+                }
+            ]
+        },
         "configuration": {
             "title": "Rememberall",
             "properties": {
@@ -24,6 +48,24 @@
                     "type": "boolean",
                     "markdownDescription": "Create a debug channel in the output view",
                     "default": "false"
+                },
+                "rememberall.showInExplorer": {
+                    "type": "boolean",
+                    "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
+                    "default": true
+                },
+                "rememberall.syncEnabled": {
+                    "type": "boolean",
+                    "description": "Enable syncing via gist",
+                    "default": true
+                },
+                "rememberall.syncToken": {
+                    "type": "string",
+                    "description": "A github token to allow sync via gist"
+                },
+                "rememberall.syncGistId": {
+                    "type": "string",
+                    "description": "A github gist ID used to store shared settings"
                 }
             }
         },
@@ -36,5 +78,8 @@
     },
     "devDependencies": {
         "vscode": "^1.0.0"
+    },
+    "dependencies": {
+        "gistore": "^0.1.1"
     }
 }
