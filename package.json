@@ -1,0 +1,40 @@
+{
+    "name": "rememberall",
+    "displayName": "Rememberall",
+    "description": "A simple extension that provides a todo list",
+    "icon": "rememberall.png",
+    "version": "0.0.1",
+    "publisher": "Gruntfuggly",
+    "repository": "https://github.com/Gruntfuggly/rememberall",
+    "engines": {
+        "vscode": "^1.5.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "configuration": {
+            "title": "Rememberall",
+            "properties": {
+                "rememberall.debug": {
+                    "type": "boolean",
+                    "markdownDescription": "Create a debug channel in the output view",
+                    "default": "false"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "rememberall.create",
+                "title": "Create"
+            }
+        ]
+    },
+    "devDependencies": {
+        "vscode": "^1.0.0"
+    }
+}
