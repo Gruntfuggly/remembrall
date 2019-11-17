@@ -139,8 +139,17 @@ class RememberallDataProvider
         entryNodes = [];
     }
 
-    add( event, source )
+    add( entry )
     {
+        var entryNode = {
+            type: ENTRY,
+            label: entry.label,
+            id: newNodeId(),
+            visible: true
+        };
+
+        entryNodes.push( entryNode );
+
         // function findDate( node )
         // {
         //     return node.label === this.label;

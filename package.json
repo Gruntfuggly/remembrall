@@ -2,7 +2,7 @@
     "name": "rememberall",
     "displayName": "Rememberall",
     "description": "A simple extension that provides a todo list",
-    "icon": "rememberall.png",
+    "icon": "resources/rememberall.png",
     "version": "0.0.1",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/rememberall",
@@ -41,6 +41,45 @@
                 }
             ]
         },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "rememberall.authorize",
+                    "when": "view =~ /rememberall/ && !rememberall-is-authorized",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "rememberall.create",
+                    "when": "view =~ /rememberall/ && rememberall-is-authorized",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "rememberall.filter",
+                    "when": "view =~ /rememberall/ && !rememberall-is-filtered && rememberall-tree-has-content && rememberall-is-authorized",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "rememberall.clearFilter",
+                    "when": "view =~ /rememberall/ && rememberall-is-filtered && rememberall-tree-has-content && rememberall-is-authorized",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "rememberall.refresh",
+                    "when": "view =~ /rememberall/ && rememberall-is-authorized",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "rememberall.expand",
+                    "when": "view =~ /rememberall/ && rememberall-show-expand && rememberall-tree-has-content && rememberall-is-authorized",
+                    "group": "navigation@4"
+                },
+                {
+                    "command": "rememberall.collapse",
+                    "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content && rememberall-is-authorized",
+                    "group": "navigation@4"
+                }
+            ]
+        },
         "configuration": {
             "title": "Rememberall",
             "properties": {
@@ -71,8 +110,90 @@
         },
         "commands": [
             {
+                "command": "rememberall.authorize",
+                "title": "Authorize",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/authorize.svg",
+                    "light": "resources/icons/light/authorize.svg"
+                }
+            },
+            {
+                "command": "rememberall.resetCache",
+                "title": "Reset Cache",
+                "category": "Rememberall"
+            },
+            {
+                "command": "rememberall.refresh",
+                "title": "Refresh",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/refresh.svg",
+                    "light": "resources/icons/light/refresh.svg"
+                }
+            },
+            {
+                "command": "rememberall.filter",
+                "title": "Filter",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/filter.svg",
+                    "light": "resources/icons/light/filter.svg"
+                }
+            },
+            {
+                "command": "rememberall.clearFilter",
+                "title": "Clear",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/clear-filter.svg",
+                    "light": "resources/icons/light/clear-filter.svg"
+                }
+            },
+            {
+                "command": "rememberall.expand",
+                "title": "Expand all",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/expand.svg",
+                    "light": "resources/icons/light/expand.svg"
+                }
+            },
+            {
+                "command": "rememberall.collapse",
+                "title": "Collapse all",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/collapse.svg",
+                    "light": "resources/icons/light/collapse.svg"
+                }
+            },
+            {
                 "command": "rememberall.create",
-                "title": "Create"
+                "title": "Create New Entry",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/add.svg",
+                    "light": "resources/icons/light/add.svg"
+                }
+            },
+            {
+                "command": "rememberall.edit",
+                "title": "Change",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/edit.svg",
+                    "light": "resources/icons/light/edit.svg"
+                }
+            },
+            {
+                "command": "rememberall.remove",
+                "title": "Remove",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/trash.svg",
+                    "light": "resources/icons/light/trash.svg"
+                }
             }
         ]
     },

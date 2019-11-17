@@ -92,6 +92,7 @@ function activate( context )
         var expanded = context.workspaceState.get( 'rememberall.expanded' );
         var showInExplorer = vscode.workspace.getConfiguration( 'rememberall' ).get( 'showInExplorer' );
         // var authorized = context.globalState.get( 'calendar.google.token' ) ? true : false;
+        var authorized = true;
         var hasFilter = context.workspaceState.get( 'rememberall.filter' );
 
         vscode.commands.executeCommand( 'setContext', 'rememberall-show-expand', !expanded );
@@ -100,7 +101,7 @@ function activate( context )
         vscode.commands.executeCommand( 'setContext', 'rememberall-is-filtered', hasFilter );
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', rememberallTree.hasContent() );
         vscode.commands.executeCommand( 'setContext', 'rememberall-in-explorer', showInExplorer );
-        // vscode.commands.executeCommand( 'setContext', 'rememberall-is-authorized', authorized );
+        vscode.commands.executeCommand( 'setContext', 'rememberall-is-authorized', authorized );
     }
 
     function collapse()
@@ -159,14 +160,20 @@ function activate( context )
         return result;
     }
 
-    function createEntry()
+    function create()
     {
         // var status = vscode.window.createStatusBarItem();
         // status.text = "Creating event...";
         // status.show();
 
-        // vscode.window.showInputBox( { prompt: "Please enter an event description" } ).then( function( summary )
-        // {
+        vscode.window.showInputBox( { prompt: "Remember this:" } ).then( function( entry )
+        {
+            if( entry )
+            {
+                rememberallTree.add( { label: entry } );
+                rememberallTree.refresh();
+            }
+        } );
         //     if( summary )
         //     {
         //         getDateAndTime( function( parsedDateTime )
@@ -239,20 +246,16 @@ function activate( context )
     {
         vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
 
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.open', openInBrowser ) );
         // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.authorize', refresh ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.refresh', refresh ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.expand', expand ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.collapse', collapse ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.refresh', refresh ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.expand', expand ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.collapse', collapse ) );
         // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.resetCache', resetCache ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.filter', filter ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.clearFilter', clearFilter ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.createEvent', createEvent ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.edit', edit ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.remove', remove ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.setLocation', setLocation ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.setReminder', setReminder ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.bumpEvent', bumpEvent ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.filter', filter ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.clearFilter', clearFilter ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.create', create ) );
+        // context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
+        // context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
 
         context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( rememberallView.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
