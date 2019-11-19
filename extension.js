@@ -230,6 +230,7 @@ function activate( context )
         //         } );
         //     } );
         // }
+        context.globalState.update( 'rememberall.entries', [] );
 
         context.workspaceState.update( 'rememberall.expanded', undefined );
         context.workspaceState.update( 'rememberall.filter', undefined );

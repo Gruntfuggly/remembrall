@@ -1,4 +1,5 @@
 var vscode = require( 'vscode' );
+var path = require( 'path' );
 
 var entryNodes = [];
 var expandedNodes = {};
@@ -33,8 +34,9 @@ class RememberallDataProvider
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-        buildCounter = _context.workspaceState.get( 'buildCounter', 1 );
         expandedNodes = _context.workspaceState.get( 'rememberall.expandedNodes', {} );
+
+        entryNodes = this._context.globalState.get( 'rememberall.entries' ) || [];
     }
 
     debug( text )
@@ -80,15 +82,15 @@ class RememberallDataProvider
         // }
     }
 
-    // getIcon( name )
-    // {
-    //     var icon = {
-    //         dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", name + ".svg" ) ),
-    //         light: this._context.asAbsolutePath( path.join( "resources/icons", "light", name + ".svg" ) )
-    //     };
+    getIcon( name )
+    {
+        var icon = {
+            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", name + ".svg" ) ),
+            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", name + ".svg" ) )
+        };
 
-    //     return icon;
-    // }
+        return icon;
+    }
 
     // getParent( node )
     // {
@@ -110,10 +112,10 @@ class RememberallDataProvider
         //     treeItem.description = node.label;
         // }
 
-        // if( node.icon )
-        // {
-        //     treeItem.iconPath = this.getIcon( node.icon );
-        // }
+        if( node.icon )
+        {
+            treeItem.iconPath = this.getIcon( node.icon );
+        }
 
         if( node.nodes && node.nodes.length > 0 )
         {
@@ -145,11 +147,13 @@ class RememberallDataProvider
             type: ENTRY,
             label: entry.label,
             id: newNodeId(),
-            visible: true
+            visible: true,
+            icon: 'rememberall'
         };
 
         entryNodes.push( entryNode );
 
+        this._context.globalState.update( 'rememberall.entries', entryNodes );
         // function findDate( node )
         // {
         //     return node.label === this.label;
