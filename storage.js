@@ -1,11 +1,36 @@
 var vscode = require( 'vscode' );
 var gistore = require( 'gistore' );
-// var utils = require( './utils' );
 
+var generalOutputChannel;
 var active = false;
 var state;
 var backupTimer;
 var queue = [];
+
+function initialize( globalState, outputChannel )
+{
+    state = globalState;
+    generalOutputChannel = outputChannel;
+
+    initializeSync();
+}
+
+function setOutputChannel( outputChannel )
+{
+    generalOutputChannel = outputChannel;
+}
+
+function log( text )
+{
+    if( generalOutputChannel )
+    {
+        generalOutputChannel.appendLine( new Date().toLocaleTimeString() + " " + text );
+    }
+    else
+    {
+        console.log( text );
+    }
+}
 
 var enqueue = function( fn, context, params )
 {
@@ -33,14 +58,12 @@ function sync( callback )
             {
                 var now = new Date();
 
-                utils.log( "Sync at " + now.toISOString() );
+                log( "Sync at " + now.toISOString() );
 
-                if( state.get( 'lastSync' ) === undefined || data.discordSync.lastSync > state.get( 'lastSync' ) )
+                if( state.get( 'lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'lastSync' ) )
                 {
-                    state.update( 'mutedServers', data.discordSync.mutedServers );
-                    state.update( 'mutedChannels', data.discordSync.mutedChannels );
-                    state.update( 'lastRead', data.discordSync.lastRead );
-                    state.update( 'lastSync', data.discordSync.lastSync );
+                    state.update( 'rememberall.items', data.rememberallSync.mutedServers );
+                    state.update( 'lastSync', data.rememberallSync.lastSync );
                 }
 
                 if( callback )
@@ -63,12 +86,15 @@ function sync( callback )
         }
         else
         {
-            callback();
+            if( callback )
+            {
+                callback();
+            }
             processQueue();
         }
     }
 
-    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled' ) === true )
+    if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
         queue.push( enqueue( doSync, this, [ callback ] ) );
 
@@ -82,9 +108,9 @@ function sync( callback )
 
 function initializeSync()
 {
-    var enabled = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled', undefined );
-    var token = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncToken', undefined );
-    var gistId = vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncGistId', undefined );
+    var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
+    var token = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken', undefined );
+    var gistId = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncGistId', undefined );
 
     if( enabled === true && token )
     {
@@ -92,34 +118,30 @@ function initializeSync()
 
         if( gistId )
         {
+            log( "Reading from gist " + gistId );
+
             gistore.setId( gistId );
 
             sync();
         }
         else
         {
-            gistore.createBackUp( 'discordSync',
+            log( "Creating new gist..." );
+
+            gistore.createBackUp( 'rememberallSync',
                 {
-                    discordSync: {
-                        mutedServers: state.get( 'mutedServers' ),
-                        mutedChannels: state.get( 'mutedChannels' ),
-                        lastRead: state.get( 'lastRead' ),
+                    rememberallSync: {
+                        items: state.get( 'rememberall.items' ),
                         lastSync: new Date()
                     }
                 } )
                 .then( function( id )
                 {
-                    vscode.workspace.getConfiguration( 'discord-chat' ).update( 'syncGistId', id, true );
+                    log( "New gist " + id );
+                    vscode.workspace.getConfiguration( 'rememberall' ).update( 'syncGistId', id, true );
                 } );
         }
     }
-}
-
-function initialize( workspaceState )
-{
-    state = workspaceState;
-
-    initializeSync();
 }
 
 function setActive( isActive )
@@ -139,18 +161,16 @@ function backup()
         {
             var now = new Date();
 
-            utils.log( "Starting backup at " + now.toISOString() );
+            log( "Starting backup at " + now.toISOString() );
 
             gistore.backUp( {
-                discordSync: {
-                    mutedServers: state.get( 'mutedServers' ),
-                    mutedChannels: state.get( 'mutedChannels' ),
-                    lastRead: state.get( 'lastRead' ),
+                rememberallSync: {
+                    items: state.get( 'rememberall.items' ),
                     lastSync: now
                 }
             } ).then( function()
             {
-                utils.log( "Backup at " + now.toISOString() );
+                log( "Backup at " + now.toISOString() );
                 processQueue();
             } ).catch( function( error )
             {
@@ -173,32 +193,18 @@ function backup()
     }
     else
     {
-        utils.log( "not active" );
+        log( "not active" );
     }
 }
 
 function triggerBackup()
 {
-    if( vscode.workspace.getConfiguration( 'discord-chat' ).get( 'syncEnabled' ) === true )
+    if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
-        utils.log( "Backing up in 1 second..." );
+        log( "Backing up in 1 second..." );
         clearTimeout( backupTimer );
         backupTimer = setTimeout( backup, 1000 );
     }
-}
-
-function setServerMuted( server, muted )
-{
-    var mutedServers = state.get( 'mutedServers' );
-    mutedServers[ server.id.toString() ] = muted;
-    state.update( 'mutedServers', mutedServers );
-    triggerBackup();
-    utils.log( "Server " + server.name + ( muted ? " muted" : " unmuted" ) );
-}
-
-function getServerMuted( server )
-{
-    return server && server.id && state.get( 'mutedServers' )[ server.id.toString() ];
 }
 
 function resetSync()
@@ -207,27 +213,26 @@ function resetSync()
     {
         var now = new Date();
         gistore.backUp( {
-            discordSync: {
-                mutedServers: {},
-                mutedChannels: {},
-                lastRead: {},
+            rememberallSync: {
+                items: [],
                 lastSync: now
             }
         } ).then( function()
         {
-            utils.log( "Reset sync at " + now.toISOString() );
+            log( "Reset sync at " + now.toISOString() );
             sync();
         } ).catch( function( error )
         {
-            utils.log( "reset failed: " + error );
+            log( "reset failed: " + error );
             console.error( "reset failed: " + error );
         } );
     }
 }
 
 module.exports.initialize = initialize;
+module.exports.setOutputChannel = setOutputChannel;
 module.exports.setActive = setActive;
-
 module.exports.initializeSync = initializeSync;
 module.exports.sync = sync;
 module.exports.resetSync = resetSync;
+module.exports.triggerBackup = triggerBackup;

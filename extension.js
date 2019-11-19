@@ -1,13 +1,13 @@
 
 var vscode = require( 'vscode' );
-var TreeView = require( './tree' );
+var tree = require( './tree' );
+var storage = require( './storage' );
 
 function activate( context )
 {
     var outputChannel;
-    var notifications = {};
 
-    var rememberallTree = new TreeView.RememberallDataProvider( context, outputChannel );
+    var rememberallTree = new tree.RememberallDataProvider( context, outputChannel );
 
     var rememberallViewExplorer = vscode.window.createTreeView( "rememberall-explorer", { treeDataProvider: rememberallTree } );
     var rememberallView = vscode.window.createTreeView( "rememberall", { treeDataProvider: rememberallTree } );
@@ -26,18 +26,25 @@ function activate( context )
         {
             outputChannel.dispose();
             outputChannel = undefined;
+            storage.setOutputChannel( undefined );
         }
         if( vscode.workspace.getConfiguration( 'rememberall' ).debug === true )
         {
             outputChannel = vscode.window.createOutputChannel( "Rememberall" );
+            storage.setOutputChannel( outputChannel );
             debug( "Ready" );
         }
     }
 
     function refresh()
     {
-        // rememberallTree.clear();
-        // resync...
+        function onSync()
+        {
+            // rememberallTree.clear();
+            rememberallTree.rebuild();
+        }
+
+        storage.sync( onSync );
     }
 
     function clearFilter()
@@ -133,30 +140,10 @@ function activate( context )
             {
                 rememberallTree.add( { label: item } );
                 rememberallTree.refresh();
+                storage.triggerBackup();
             }
         } );
     }
-
-    function selectedNode()
-    {
-        var result;
-        if( rememberallViewExplorer && rememberallViewExplorer.visible === true )
-        {
-            rememberallViewExplorer.selection.map( function( node )
-            {
-                result = node;
-            } );
-        }
-        if( rememberallView && rememberallView.visible === true )
-        {
-            rememberallView.selection.map( function( node )
-            {
-                result = node;
-            } );
-        }
-        return result;
-    }
-
 
     function remove( node )
     {
@@ -170,6 +157,7 @@ function activate( context )
                 {
                     rememberallTree.remove( node );
                     rememberallTree.refresh();
+                    storage.triggerBackup();
                 }
             } );
         }
@@ -193,6 +181,7 @@ function activate( context )
                 {
                     rememberallTree.edit( node, update );
                     rememberallTree.refresh();
+                    storage.triggerBackup();
                 }
             } );
         }
@@ -240,6 +229,8 @@ function activate( context )
 
     function register()
     {
+        storage.initialize( context.globalState );
+
         vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
 
         // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.authorize', refresh ) );
@@ -252,6 +243,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.create', create ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetSync', storage.resetSync ) );
 
         context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( rememberallView.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
@@ -270,6 +262,13 @@ function activate( context )
                 {
                     setContext();
                 }
+                else if(
+                    e.affectsConfiguration( 'rememberall.syncToken' ) ||
+                    e.affectsConfiguration( 'rememberall.syncEnabled' ) ||
+                    e.affectsConfiguration( 'rememberall.syncGistId' ) )
+                {
+                    storage.initializeSync();
+                }
                 else
                 {
                     refresh();
@@ -277,10 +276,22 @@ function activate( context )
             }
         } ) );
 
+        context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
+        {
+            // trace( "vscode.workspace.onDidChangeWindowState" );
+            storage.setActive( e.focused );
+            if( e.focused )
+            {
+                refresh();
+            }
+        } ) );
+
         context.subscriptions.push( outputChannel );
 
         resetOutputChannel();
         setContext();
+        storage.setActive( true );
+        refresh();
     }
 
     register();

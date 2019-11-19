@@ -31,7 +31,7 @@ class RememberallDataProvider
 
         expandedNodes = _context.workspaceState.get( 'rememberall.expandedNodes', {} );
 
-        itemNodes = this._context.globalState.get( 'rememberall.entries' ) || [];
+        itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
     }
 
     debug( text )
@@ -142,7 +142,7 @@ class RememberallDataProvider
 
         itemNodes.push( itemNode );
 
-        this._context.globalState.update( 'rememberall.entries', itemNodes );
+        this._context.globalState.update( 'rememberall.items', itemNodes );
     }
 
     edit( item, update )
@@ -155,7 +155,7 @@ class RememberallDataProvider
             }
         }, itemNodes );
 
-        this._context.globalState.update( 'rememberall.entries', itemNodes );
+        this._context.globalState.update( 'rememberall.items', itemNodes );
     }
 
     remove( item )
@@ -165,7 +165,7 @@ class RememberallDataProvider
             return node.id !== item.id;
         } );
 
-        this._context.globalState.update( 'rememberall.entries', itemNodes );
+        this._context.globalState.update( 'rememberall.items', itemNodes );
     }
 
     rebuild( nodes )
@@ -188,6 +188,7 @@ class RememberallDataProvider
     {
         buildCounter += 1;
         nodeCounter = 1;
+        itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
         this.rebuild();
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', itemNodes.length > 0 );
