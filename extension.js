@@ -1,16 +1,6 @@
 
 var vscode = require( 'vscode' );
-// var chrono = require( 'chrono-node' );
-// var googleCalendar = require( './google' );
-// var outlookCalendar = require( './outlook' );
 var TreeView = require( './tree' );
-// var utils = require( './utils' );
-
-// var GOOGLE = 'GOOGLE';
-// var OUTLOOK = 'OUTLOOK';
-// var OK = 'OK';
-// var IGNORE = 'Snooze';
-// var BUMP = "Bump";
 
 function activate( context )
 {
@@ -44,35 +34,10 @@ function activate( context )
         }
     }
 
-    function fetch()
-    {
-        // var config = vscode.workspace.getConfiguration( 'rememberall' );
-        // if( config.get( 'google.enabled' ) )
-        // {
-        //     googleCalendar.fetch( function( events )
-        //     {
-        //         debug( "Found " + events.length + " events" );
-        //         events.map( function( event )
-        //         {
-        //             rememberallTree.add( event, GOOGLE );
-        //         } );
-        //         filterTree( context.workspaceState.get( 'calendar.filter' ) );
-        //         rememberallTree.refresh();
-        //         setContext();
-        //         if( !allDayNotificationsShown )
-        //         {
-        //             showAllDayNotifications( events );
-        //         }
-        //         showNotifications( events );
-        //         debug( "Ready" );
-        //     }, context );
-        // }
-    }
-
     function refresh()
     {
-        rememberallTree.clear();
-        fetch();
+        // rememberallTree.clear();
+        // resync...
     }
 
     function clearFilter()
@@ -162,49 +127,79 @@ function activate( context )
 
     function create()
     {
-        // var status = vscode.window.createStatusBarItem();
-        // status.text = "Creating event...";
-        // status.show();
-
-        vscode.window.showInputBox( { prompt: "Remember this:" } ).then( function( entry )
+        vscode.window.showInputBox( { placeHolder: "Enter something to remember..." } ).then( function( item )
         {
-            if( entry )
+            if( item )
             {
-                rememberallTree.add( { label: entry } );
+                rememberallTree.add( { label: item } );
                 rememberallTree.refresh();
             }
         } );
-        //     if( summary )
-        //     {
-        //         getDateAndTime( function( parsedDateTime )
-        //         {
-        //             var config = vscode.workspace.getConfiguration( 'calendar' );
+    }
 
-        //             debug( "parsed date and time: " + JSON.stringify( parsedDateTime, null, 2 ) );
-        //             var eventDateTime = {
-        //                 start: parsedDateTime[ 0 ].start.date(),
-        //                 allDay: isAllDay( parsedDateTime )
-        //             };
-        //             if( parsedDateTime[ 0 ].end )
-        //             {
-        //                 eventDateTime.end = parsedDateTime[ 0 ].end.date();
-        //             }
-        //             else if( parsedDateTime.length > 1 )
-        //             {
-        //                 eventDateTime.end = parsedDateTime[ 1 ].start.date();
-        //             }
+    function selectedNode()
+    {
+        var result;
+        if( rememberallViewExplorer && rememberallViewExplorer.visible === true )
+        {
+            rememberallViewExplorer.selection.map( function( node )
+            {
+                result = node;
+            } );
+        }
+        if( rememberallView && rememberallView.visible === true )
+        {
+            rememberallView.selection.map( function( node )
+            {
+                result = node;
+            } );
+        }
+        return result;
+    }
 
-        //             if( config.get( 'google.enabled' ) )
-        //             {
-        //                 googleCalendar.createEvent( refresh, summary, eventDateTime );
-        //             }
-        //         }, status, "Please enter the date and time of the event", "E.g., Friday at 4.15pm", "Creating event", undefined, showEventHint );
-        //     }
-        //     else
-        //     {
-        //         status.dispose();
-        //     }
-        // } );
+
+    function remove( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showInformationMessage( "Are you sure you want to remove this item?", 'Yes', 'No' ).then( function( confirm )
+            {
+                if( confirm === 'Yes' )
+                {
+                    rememberallTree.remove( node );
+                    rememberallTree.refresh();
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
+    function edit( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showInputBox( {
+                value: node.label
+            } ).then( function( update )
+            {
+                if( update )
+                {
+                    rememberallTree.edit( node, update );
+                    rememberallTree.refresh();
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
     }
 
     function filter()
@@ -251,12 +246,12 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.refresh', refresh ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.expand', expand ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.collapse', collapse ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.resetCache', resetCache ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetCache', resetCache ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.filter', filter ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.clearFilter', clearFilter ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.create', create ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
-        // context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
 
         context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( rememberallView.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
@@ -275,18 +270,7 @@ function activate( context )
                 {
                     setContext();
                 }
-                else if( true
-                    // e.affectsConfiguration( 'calendar.maxEvents' ) ||
-                    // e.affectsConfiguration( 'calendar.historicDays' ) ||
-                    // e.affectsConfiguration( 'calendar.notificationInterval' ) ||
-                    // e.affectsConfiguration( 'calendar.notificationRepeatInterval' ) ||
-                    // e.affectsConfiguration( 'calendar.showRelativeDates' ) ||
-                    // e.affectsConfiguration( 'calendar.google.enabled' ) ||
-                    // e.affectsConfiguration( 'calendar.google.credentialsFile' ) ||
-                    // e.affectsConfiguration( 'calendar.outlook.enabled' ) ||
-                    // e.affectsConfiguration( 'calendar.outlook.clientSecret' ) ||
-                    // e.affectsConfiguration( 'calendar.outlook.clientId' )
-                )
+                else
                 {
                     refresh();
                 }

@@ -22,7 +22,7 @@
                 {
                     "id": "rememberall",
                     "title": "Rememberall",
-                    "icon": "resources/ball-star.svg"
+                    "icon": "resources/rememberall-container.svg"
                 }
             ]
         },
@@ -77,6 +77,18 @@
                     "command": "rememberall.collapse",
                     "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content && rememberall-is-authorized",
                     "group": "navigation@4"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "rememberall.remove",
+                    "when": "view =~ /rememberall/",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "rememberall.edit",
+                    "when": "view =~ /rememberall/",
+                    "group": "inline@1"
                 }
             ]
         },
@@ -170,7 +182,7 @@
             },
             {
                 "command": "rememberall.create",
-                "title": "Create New Entry",
+                "title": "Create New Item",
                 "category": "Rememberall",
                 "icon": {
                     "dark": "resources/icons/dark/add.svg",
