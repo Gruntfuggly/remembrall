@@ -54,29 +54,19 @@
                     "group": "navigation@1"
                 },
                 {
-                    "command": "rememberall.filter",
-                    "when": "view =~ /rememberall/ && !rememberall-is-filtered && rememberall-tree-has-content && rememberall-is-authorized",
-                    "group": "navigation@2"
-                },
-                {
-                    "command": "rememberall.clearFilter",
-                    "when": "view =~ /rememberall/ && rememberall-is-filtered && rememberall-tree-has-content && rememberall-is-authorized",
-                    "group": "navigation@2"
-                },
-                {
                     "command": "rememberall.refresh",
                     "when": "view =~ /rememberall/ && rememberall-is-authorized",
-                    "group": "navigation@3"
+                    "group": "navigation@2"
                 },
                 {
                     "command": "rememberall.expand",
                     "when": "view =~ /rememberall/ && rememberall-show-expand && rememberall-tree-has-content && rememberall-is-authorized",
-                    "group": "navigation@4"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "rememberall.collapse",
                     "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content && rememberall-is-authorized",
-                    "group": "navigation@4"
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [
@@ -91,14 +81,19 @@
                     "group": "inline@2"
                 },
                 {
-                    "command": "rememberall.remove",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canDelete/",
-                    "group": "inline@4"
+                    "command": "rememberall.makeChild",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canParent/",
+                    "group": "inline@3"
                 },
                 {
                     "command": "rememberall.edit",
                     "when": "view =~ /rememberall/ && viewItem =~ /canEdit/",
-                    "group": "inline@3"
+                    "group": "inline@4"
+                },
+                {
+                    "command": "rememberall.remove",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canDelete/",
+                    "group": "inline@5"
                 }
             ]
         },
@@ -215,6 +210,15 @@
                 "icon": {
                     "dark": "resources/icons/dark/arrow-down.svg",
                     "light": "resources/icons/light/arrow-down.svg"
+                }
+            },
+            {
+                "command": "rememberall.makeChild",
+                "title": "Make Child",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/tree.svg",
+                    "light": "resources/icons/light/tree.svg"
                 }
             }
         ]

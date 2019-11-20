@@ -182,6 +182,17 @@ function activate( context )
         }
     }
 
+    function makeChild( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            rememberallTree.makeChild( node );
+            storage.triggerBackup();
+        }
+    }
+
     function resetCache()
     {
         context.globalState.update( 'rememberall.lastSync', undefined );
@@ -212,6 +223,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveUp', moveUp ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveDown', moveDown ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.makeChild', makeChild ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetSync', storage.resetSync ) );
 
         context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );

@@ -32,16 +32,21 @@ function debug( text )
     }
 }
 
-function itemsForStorage()
+function cleanItems( items )
 {
-    var items = state.get( 'rememberall.items' ) || [];
     return items.map( function( item )
     {
-        return {
+        var cleaned = {
             type: item.type,
             label: item.label,
-            icon: item.icon
+            icon: item.icon,
+            nodes: [],
         };
+        if( item.nodes && item.nodes.length > 0 )
+        {
+            cleaned.nodes = cleanItems( item.nodes );
+        }
+        return cleaned;
     } );
 }
 
@@ -68,7 +73,7 @@ function initializeSync()
             gistore.createBackUp( 'rememberallSync',
                 {
                     rememberallSync: {
-                        items: itemsForStorage(),
+                        items: cleanItems( state.get( 'rememberall.items' ) || [] ),
                         nodeCounter: state.get( 'rememberall.nodeCounter' ),
                         lastSync: new Date()
                     }
@@ -109,6 +114,7 @@ function sync( callback )
                 var now = new Date();
 
                 debug( "Sync at " + now.toISOString() );
+
                 if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'rememberall.lastSync' ) )
                 {
                     state.update( 'rememberall.items', data.rememberallSync.items );
@@ -182,7 +188,7 @@ function backup()
 
             gistore.backUp( {
                 rememberallSync: {
-                    items: itemsForStorage(),
+                    items: cleanItems( state.get( 'rememberall.items' ) || [] ),
                     nodeCounter: state.get( 'rememberall.nodeCounter' ),
                     lastSync: now
                 }

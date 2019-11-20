@@ -45,6 +45,10 @@ class RememberallDataProvider
             }
             return [ { label: "Nothing found" } ];
         }
+        else if( node.nodes )
+        {
+            return node.nodes;
+        }
     }
 
     getIcon( name )
@@ -76,6 +80,7 @@ class RememberallDataProvider
             treeItem.iconPath = this.getIcon( node.icon );
         }
 
+        console.log( "getTreeItem:" + node.label + " nodes:" + ( node.nodes && node.nodes.length ) );
         if( node.nodes && node.nodes.length > 0 )
         {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
@@ -106,12 +111,12 @@ class RememberallDataProvider
             type: ITEM,
             label: item.label,
             icon: 'rememberall',
-            contextValue: 'canEdit canDelete canMoveUp',
+            nodes: []
         };
 
         itemNodes.push( itemNode );
 
-        this.resetOrder();
+        this.resetOrder( itemNodes );
 
         this._context.globalState.update( 'rememberall.items', itemNodes );
     }
@@ -136,7 +141,7 @@ class RememberallDataProvider
             return node.id !== item.id;
         } );
 
-        this.resetOrder();
+        this.resetOrder( itemNodes );
 
         this._context.globalState.update( 'rememberall.items', itemNodes );
     }
@@ -157,31 +162,35 @@ class RememberallDataProvider
         }, this );
     }
 
-    resetOrder()
+    resetOrder( nodes )
     {
-        var oldNodes = itemNodes;
-        itemNodes = oldNodes.map( function( item, index )
+        nodes = nodes.map( function( node, index )
         {
-            item.contextValue = 'canEdit canDelete';
+            node.contextValue = 'canEdit canDelete';
             if( index !== 0 )
             {
-                item.contextValue += ' canMoveUp';
+                node.contextValue += ' canMoveUp canParent';
             }
-            if( index < oldNodes.length - 1 )
+            if( index < nodes.length - 1 )
             {
-                item.contextValue += ' canMoveDown';
+                node.contextValue += ' canMoveDown';
             }
-            return item;
-        } );
+            if( node.nodes )
+            {
+                this.resetOrder( node.nodes );
+            }
+            return node;
+        }, this );
     }
 
     refresh()
     {
         nodeCounter = this._context.globalState.get( 'rememberall.nodeCounter' ) || 1;
         itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
-        this.resetOrder();
+        this.resetOrder( itemNodes );
         this.rebuild();
         this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
+        this._context.globalState.update( 'rememberall.items', itemNodes )
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', itemNodes.length > 0 );
     }
@@ -205,11 +214,8 @@ class RememberallDataProvider
         var temp = itemNodes[ index ];
         itemNodes[ index ] = itemNodes[ index - 1 ];
         itemNodes[ index - 1 ] = temp;
-        this.resetOrder();
-        this.rebuild();
         this._context.globalState.update( 'rememberall.items', itemNodes );
-        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
-        this._onDidChangeTreeData.fire();
+        this.refresh();
     }
 
     moveDown( node )
@@ -218,11 +224,18 @@ class RememberallDataProvider
         var temp = itemNodes[ index ];
         itemNodes[ index ] = itemNodes[ index + 1 ];
         itemNodes[ index + 1 ] = temp;
-        this.resetOrder();
-        this.rebuild();
         this._context.globalState.update( 'rememberall.items', itemNodes );
-        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
-        this._onDidChangeTreeData.fire();
+        this.refresh();
+    }
+
+    makeChild( node )
+    {
+        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var parent = itemNodes[ index - 1 ];
+        var child = itemNodes.splice( index, 1 );
+        parent.nodes.push( child[ 0 ] );
+        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this.refresh();
     }
 }
 
