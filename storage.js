@@ -32,19 +32,20 @@ function debug( text )
     }
 }
 
-function cleanItems( items )
+function cleanNodes( nodes )
 {
-    return items.map( function( item )
+    return nodes.map( function( node )
     {
         var cleaned = {
-            type: item.type,
-            label: item.label,
-            icon: item.icon,
+            type: node.type,
+            label: node.label,
+            icon: node.icon,
+            uniqueId: node.uniqueId,
             nodes: [],
         };
-        if( item.nodes && item.nodes.length > 0 )
+        if( node.nodes && node.nodes.length > 0 )
         {
-            cleaned.nodes = cleanItems( item.nodes );
+            cleaned.nodes = cleanNodes( node.nodes );
         }
         return cleaned;
     } );
@@ -73,7 +74,7 @@ function initializeSync()
             gistore.createBackUp( 'rememberallSync',
                 {
                     rememberallSync: {
-                        items: cleanItems( state.get( 'rememberall.items' ) || [] ),
+                        items: cleanNodes( state.get( 'rememberall.items' ) || [] ),
                         nodeCounter: state.get( 'rememberall.nodeCounter' ),
                         lastSync: new Date()
                     }
@@ -188,7 +189,7 @@ function backup()
 
             gistore.backUp( {
                 rememberallSync: {
-                    items: cleanItems( state.get( 'rememberall.items' ) || [] ),
+                    items: cleanNodes( state.get( 'rememberall.items' ) || [] ),
                     nodeCounter: state.get( 'rememberall.nodeCounter' ),
                     lastSync: now
                 }

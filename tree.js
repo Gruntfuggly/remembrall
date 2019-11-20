@@ -6,6 +6,15 @@ var nodeCounter = 1;
 
 var ITEM = "ITEM";
 
+function uuidv4()
+{
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function( c )
+    {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : ( r & 0x3 | 0x8 );
+        return v.toString( 16 );
+    } );
+}
+
 class RememberallDataProvider
 {
     constructor( _context, outputChannel )
@@ -79,18 +88,16 @@ class RememberallDataProvider
             treeItem.iconPath = this.getIcon( node.icon );
         }
 
-        console.log( "getTreeItem:" + node.label + " nodes:" + ( node.nodes && node.nodes.length ) );
         if( node.nodes && node.nodes.length > 0 )
         {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-            var nodeId = node.startDate + ( node.endDate ? node.endDate : "" );
-            if( expandedNodes[ nodeId ] !== undefined )
+            if( expandedNodes[ node.uniqueId ] !== undefined )
             {
-                treeItem.collapsibleState = ( expandedNodes[ nodeId ] === true ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+                treeItem.collapsibleState = ( expandedNodes[ node.uniqueId ] === true ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
             else
             {
-                treeItem.collapsibleState = ( this._context.workspaceState.get( 'rememberall.expanded' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
+                treeItem.collapsibleState = ( this._context.workspaceState.get( 'rememberall.expandedNodes' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
             }
         }
 
@@ -108,6 +115,8 @@ class RememberallDataProvider
     {
         var itemNode = {
             type: ITEM,
+            id: nodeCounter++,
+            uniqueId: uuidv4(),
             label: item.label,
             icon: 'rememberall',
             nodes: []
@@ -191,11 +200,10 @@ class RememberallDataProvider
 
     refresh()
     {
-        nodeCounter = this._context.globalState.get( 'rememberall.nodeCounter' ) || 1;
         this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
         this.resetOrder( this.itemNodes );
         this.rebuild();
-        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
+        this._context.workspaceState.update( 'rememberall.nodeCounter', nodeCounter )
         this._context.globalState.update( 'rememberall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', this.itemNodes.length > 0 );
@@ -203,8 +211,7 @@ class RememberallDataProvider
 
     setExpanded( node, expanded )
     {
-        var nodeId = node.startDate + ( node.endDate ? node.endDate : "" );
-        expandedNodes[ nodeId ] = expanded;
+        expandedNodes[ node.uniqueId ] = expanded;
         this._context.workspaceState.update( 'rememberall.expandedNodes', expandedNodes );
     }
 
