@@ -81,14 +81,24 @@
             ],
             "view/item/context": [
                 {
-                    "command": "rememberall.remove",
-                    "when": "view =~ /rememberall/",
+                    "command": "rememberall.moveUp",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canMoveUp/",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "rememberall.moveDown",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canMoveDown/",
                     "group": "inline@2"
                 },
                 {
+                    "command": "rememberall.remove",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canDelete/",
+                    "group": "inline@4"
+                },
+                {
                     "command": "rememberall.edit",
-                    "when": "view =~ /rememberall/",
-                    "group": "inline@1"
+                    "when": "view =~ /rememberall/ && viewItem =~ /canEdit/",
+                    "group": "inline@3"
                 }
             ]
         },
@@ -98,7 +108,7 @@
                 "rememberall.debug": {
                     "type": "boolean",
                     "markdownDescription": "Create a debug channel in the output view",
-                    "default": "false"
+                    "default": false
                 },
                 "rememberall.showInExplorer": {
                     "type": "boolean",
@@ -145,24 +155,6 @@
                 }
             },
             {
-                "command": "rememberall.filter",
-                "title": "Filter",
-                "category": "Rememberall",
-                "icon": {
-                    "dark": "resources/icons/dark/filter.svg",
-                    "light": "resources/icons/light/filter.svg"
-                }
-            },
-            {
-                "command": "rememberall.clearFilter",
-                "title": "Clear",
-                "category": "Rememberall",
-                "icon": {
-                    "dark": "resources/icons/dark/clear-filter.svg",
-                    "light": "resources/icons/light/clear-filter.svg"
-                }
-            },
-            {
                 "command": "rememberall.expand",
                 "title": "Expand all",
                 "category": "Rememberall",
@@ -191,7 +183,7 @@
             },
             {
                 "command": "rememberall.edit",
-                "title": "Change",
+                "title": "Edit",
                 "category": "Rememberall",
                 "icon": {
                     "dark": "resources/icons/dark/edit.svg",
@@ -205,6 +197,24 @@
                 "icon": {
                     "dark": "resources/icons/dark/trash.svg",
                     "light": "resources/icons/light/trash.svg"
+                }
+            },
+            {
+                "command": "rememberall.moveUp",
+                "title": "Move Up",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/arrow-up.svg",
+                    "light": "resources/icons/light/arrow-up.svg"
+                }
+            },
+            {
+                "command": "rememberall.moveDown",
+                "title": "Move Down",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/arrow-down.svg",
+                    "light": "resources/icons/light/arrow-down.svg"
                 }
             }
         ]

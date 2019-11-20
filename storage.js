@@ -20,15 +20,65 @@ function setOutputChannel( outputChannel )
     generalOutputChannel = outputChannel;
 }
 
-function log( text )
+function debug( text )
 {
     if( generalOutputChannel )
     {
-        generalOutputChannel.appendLine( new Date().toLocaleTimeString() + " " + text );
+        generalOutputChannel.appendLine( new Date().toLocaleTimeString( vscode.env.language, { hour12: false } ) + " " + text );
     }
     else
     {
         console.log( text );
+    }
+}
+
+function itemsForStorage()
+{
+    var items = state.get( 'rememberall.items' ) || [];
+    return items.map( function( item )
+    {
+        return {
+            type: item.type,
+            label: item.label,
+            icon: item.icon
+        };
+    } );
+}
+
+function initializeSync()
+{
+    var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
+    var token = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken', undefined );
+    var gistId = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncGistId', undefined );
+
+    if( enabled === true && token )
+    {
+        gistore.setToken( token );
+
+        if( gistId )
+        {
+            debug( "Reading from gist " + gistId );
+
+            gistore.setId( gistId );
+        }
+        else
+        {
+            debug( "Creating new gist..." );
+
+            gistore.createBackUp( 'rememberallSync',
+                {
+                    rememberallSync: {
+                        items: itemsForStorage(),
+                        nodeCounter: state.get( 'rememberall.nodeCounter' ),
+                        lastSync: new Date()
+                    }
+                } )
+                .then( function( id )
+                {
+                    debug( "New gist " + id );
+                    vscode.workspace.getConfiguration( 'rememberall' ).update( 'syncGistId', id, true );
+                } );
+        }
     }
 }
 
@@ -58,12 +108,12 @@ function sync( callback )
             {
                 var now = new Date();
 
-                log( "Sync at " + now.toISOString() );
-
-                if( state.get( 'lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'lastSync' ) )
+                debug( "Sync at " + now.toISOString() );
+                if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'rememberall.lastSync' ) )
                 {
-                    state.update( 'rememberall.items', data.rememberallSync.mutedServers );
-                    state.update( 'lastSync', data.rememberallSync.lastSync );
+                    state.update( 'rememberall.items', data.rememberallSync.items );
+                    state.update( 'rememberall.nodeCounter', data.rememberallSync.nodeCounter );
+                    state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
                 }
 
                 if( callback )
@@ -74,7 +124,10 @@ function sync( callback )
                 processQueue();
             } ).catch( function( error )
             {
-                console.error( "sync failed:" + error );
+                if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken' ) )
+                {
+                    debug( "sync failed:" + error );
+                }
 
                 if( callback )
                 {
@@ -86,6 +139,8 @@ function sync( callback )
         }
         else
         {
+            debug( "No sync token defined" );
+
             if( callback )
             {
                 callback();
@@ -106,44 +161,6 @@ function sync( callback )
     }
 }
 
-function initializeSync()
-{
-    var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
-    var token = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken', undefined );
-    var gistId = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncGistId', undefined );
-
-    if( enabled === true && token )
-    {
-        gistore.setToken( token );
-
-        if( gistId )
-        {
-            log( "Reading from gist " + gistId );
-
-            gistore.setId( gistId );
-
-            sync();
-        }
-        else
-        {
-            log( "Creating new gist..." );
-
-            gistore.createBackUp( 'rememberallSync',
-                {
-                    rememberallSync: {
-                        items: state.get( 'rememberall.items' ),
-                        lastSync: new Date()
-                    }
-                } )
-                .then( function( id )
-                {
-                    log( "New gist " + id );
-                    vscode.workspace.getConfiguration( 'rememberall' ).update( 'syncGistId', id, true );
-                } );
-        }
-    }
-}
-
 function setActive( isActive )
 {
     if( isActive === false )
@@ -161,16 +178,17 @@ function backup()
         {
             var now = new Date();
 
-            log( "Starting backup at " + now.toISOString() );
+            debug( "Starting backup at " + now.toISOString() );
 
             gistore.backUp( {
                 rememberallSync: {
-                    items: state.get( 'rememberall.items' ),
+                    items: itemsForStorage(),
+                    nodeCounter: state.get( 'rememberall.nodeCounter' ),
                     lastSync: now
                 }
             } ).then( function()
             {
-                log( "Backup at " + now.toISOString() );
+                debug( "Backup at " + now.toISOString() );
                 processQueue();
             } ).catch( function( error )
             {
@@ -193,7 +211,7 @@ function backup()
     }
     else
     {
-        log( "not active" );
+        debug( "Not active" );
     }
 }
 
@@ -201,7 +219,7 @@ function triggerBackup()
 {
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
-        log( "Backing up in 1 second..." );
+        debug( "Backing up in 1 second..." );
         clearTimeout( backupTimer );
         backupTimer = setTimeout( backup, 1000 );
     }
@@ -215,16 +233,16 @@ function resetSync()
         gistore.backUp( {
             rememberallSync: {
                 items: [],
+                nodeCounter: 1,
                 lastSync: now
             }
         } ).then( function()
         {
-            log( "Reset sync at " + now.toISOString() );
+            debug( "Reset sync at " + now.toISOString() );
             sync();
         } ).catch( function( error )
         {
-            log( "reset failed: " + error );
-            console.error( "reset failed: " + error );
+            debug( "Reset failed: " + error );
         } );
     }
 }

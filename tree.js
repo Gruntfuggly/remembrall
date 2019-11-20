@@ -3,21 +3,9 @@ var path = require( 'path' );
 
 var itemNodes = [];
 var expandedNodes = {};
-var buildCounter = 1;
 var nodeCounter = 1;
 
 var ITEM = "ITEM";
-var REMINDER = "REMINDER";
-
-var isVisible = function( node )
-{
-    return node.visible === true;
-};
-
-function newNodeId()
-{
-    return ( buildCounter * 1000000 ) + nodeCounter++;
-}
 
 class RememberallDataProvider
 {
@@ -51,30 +39,12 @@ class RememberallDataProvider
     {
         if( !node )
         {
-            var roots = itemNodes.filter( function( n ) { return n.visible; } );
-            if( roots.length > 0 )
+            if( itemNodes.length > 0 )
             {
-                return roots;
+                return itemNodes;
             }
             return [ { label: "Nothing found" } ];
         }
-        // else if( node.type === DATE )
-        // {
-        //     return node.nodes.filter( function( n ) { return n.visible; } );
-        // }
-        // else if( node.type === EVENT )
-        // {
-        //     var children = node.nodes.filter( function( n ) { return n.visible; } );
-        //     if( children.length > 0 )
-        //     {
-        //         return children;
-        //     }
-        //     return node.text;
-        // }
-        // else if( node.type === DETAILS )
-        // {
-        //     return node.text;
-        // }
     }
 
     getIcon( name )
@@ -96,7 +66,7 @@ class RememberallDataProvider
     {
         var treeItem = new vscode.TreeItem( node.label );
 
-        treeItem.id = node.id;
+        treeItem.id = nodeCounter++;
         treeItem.tooltip = node.tooltip;
 
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
@@ -135,12 +105,13 @@ class RememberallDataProvider
         var itemNode = {
             type: ITEM,
             label: item.label,
-            id: newNodeId(),
-            visible: true,
-            icon: 'rememberall'
+            icon: 'rememberall',
+            contextValue: 'canEdit canDelete canMoveUp',
         };
 
         itemNodes.push( itemNode );
+
+        this.resetOrder();
 
         this._context.globalState.update( 'rememberall.items', itemNodes );
     }
@@ -165,6 +136,8 @@ class RememberallDataProvider
             return node.id !== item.id;
         } );
 
+        this.resetOrder();
+
         this._context.globalState.update( 'rememberall.items', itemNodes );
     }
 
@@ -176,7 +149,7 @@ class RememberallDataProvider
         }
         nodes.forEach( function( node )
         {
-            node.id = newNodeId();
+            node.id = nodeCounter++;
             if( node.nodes )
             {
                 this.rebuild( node.nodes );
@@ -184,12 +157,31 @@ class RememberallDataProvider
         }, this );
     }
 
+    resetOrder()
+    {
+        var oldNodes = itemNodes;
+        itemNodes = oldNodes.map( function( item, index )
+        {
+            item.contextValue = 'canEdit canDelete';
+            if( index !== 0 )
+            {
+                item.contextValue += ' canMoveUp';
+            }
+            if( index < oldNodes.length - 1 )
+            {
+                item.contextValue += ' canMoveDown';
+            }
+            return item;
+        } );
+    }
+
     refresh()
     {
-        buildCounter += 1;
-        nodeCounter = 1;
+        nodeCounter = this._context.globalState.get( 'rememberall.nodeCounter' ) || 1;
         itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+        this.resetOrder();
         this.rebuild();
+        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', itemNodes.length > 0 );
     }
@@ -207,45 +199,31 @@ class RememberallDataProvider
         this._context.workspaceState.update( 'rememberall.expandedNodes', expandedNodes );
     }
 
-    filter( term, nodes )
+    moveUp( node )
     {
-        var matcher = new RegExp( term, 'i' );
-
-        if( nodes === undefined )
-        {
-            nodes = itemNodes;
-        }
-        nodes.forEach( function( node )
-        {
-            var match = matcher.test( node.label );
-
-            if( !match && node.nodes )
-            {
-                this.filter( term, node.nodes );
-                node.visible = node.nodes.filter( isVisible ).length > 0;
-            }
-            else
-            {
-                node.visible = !term || match;
-            }
-        }, this );
+        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var temp = itemNodes[ index ];
+        itemNodes[ index ] = itemNodes[ index - 1 ];
+        itemNodes[ index - 1 ] = temp;
+        this.resetOrder();
+        this.rebuild();
+        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
+        this._onDidChangeTreeData.fire();
     }
 
-    clearFilter( nodes )
+    moveDown( node )
     {
-        if( nodes === undefined )
-        {
-            nodes = itemNodes;
-        }
-        nodes.forEach( function( node )
-        {
-            node.visible = true;
-            if( node.nodes )
-            {
-                this.clearFilter( node.nodes );
-            }
-        }, this );
+        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var temp = itemNodes[ index ];
+        itemNodes[ index ] = itemNodes[ index + 1 ];
+        itemNodes[ index + 1 ] = temp;
+        this.resetOrder();
+        this.rebuild();
+        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
+        this._onDidChangeTreeData.fire();
     }
-
 }
+
 exports.RememberallDataProvider = RememberallDataProvider;
