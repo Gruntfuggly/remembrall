@@ -1,7 +1,6 @@
 var vscode = require( 'vscode' );
 var path = require( 'path' );
 
-var itemNodes = [];
 var expandedNodes = {};
 var nodeCounter = 1;
 
@@ -19,7 +18,7 @@ class RememberallDataProvider
 
         expandedNodes = _context.workspaceState.get( 'rememberall.expandedNodes', {} );
 
-        itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+        this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
     }
 
     debug( text )
@@ -32,16 +31,16 @@ class RememberallDataProvider
 
     hasContent()
     {
-        return itemNodes.length > 0;
+        return this.itemNodes.length > 0;
     }
 
     getChildren( node )
     {
         if( !node )
         {
-            if( itemNodes.length > 0 )
+            if( this.itemNodes.length > 0 )
             {
-                return itemNodes;
+                return this.itemNodes;
             }
             return [ { label: "Nothing found" } ];
         }
@@ -102,7 +101,7 @@ class RememberallDataProvider
 
     clear()
     {
-        itemNodes = [];
+        this.itemNodes = [];
     }
 
     add( item )
@@ -114,50 +113,56 @@ class RememberallDataProvider
             nodes: []
         };
 
-        itemNodes.push( itemNode );
+        this.itemNodes.push( itemNode );
 
-        this.resetOrder( itemNodes );
+        this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
     }
 
     edit( item, update )
     {
-        itemNodes.forEach( function( node, index )
+        this.itemNodes.forEach( function( node, index )
         {
             if( node.id === item.id )
             {
                 this[ index ].label = update;
             }
-        }, itemNodes );
+        }, this.itemNodes );
 
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
     }
 
     remove( item )
     {
-        itemNodes = itemNodes.filter( function( node )
+        this.itemNodes = this.itemNodes.filter( function( node )
         {
             return node.id !== item.id;
         } );
 
-        this.resetOrder( itemNodes );
+        this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
     }
 
-    rebuild( nodes )
+    rebuild( nodes, parent )
     {
         if( nodes === undefined )
         {
-            nodes = itemNodes;
+            nodes = this.itemNodes;
         }
         nodes.forEach( function( node )
         {
             node.id = nodeCounter++;
+            node.contextValue = node.contextValue || '';
+            if( parent )
+            {
+                node.parent = parent;
+                node.contextValue += ' canUnparent';
+            }
             if( node.nodes )
             {
-                this.rebuild( node.nodes );
+                this.rebuild( node.nodes, node );
             }
         }, this );
     }
@@ -166,7 +171,8 @@ class RememberallDataProvider
     {
         nodes = nodes.map( function( node, index )
         {
-            node.contextValue = 'canEdit canDelete';
+            node.contextValue = node.contextValue || ''
+            node.contextValue += 'canEdit canDelete';
             if( index !== 0 )
             {
                 node.contextValue += ' canMoveUp canParent';
@@ -186,13 +192,13 @@ class RememberallDataProvider
     refresh()
     {
         nodeCounter = this._context.globalState.get( 'rememberall.nodeCounter' ) || 1;
-        itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
-        this.resetOrder( itemNodes );
+        this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+        this.resetOrder( this.itemNodes );
         this.rebuild();
         this._context.globalState.update( 'rememberall.nodeCounter', nodeCounter )
-        this._context.globalState.update( 'rememberall.items', itemNodes )
+        this._context.globalState.update( 'rememberall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
-        vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', itemNodes.length > 0 );
+        vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', this.itemNodes.length > 0 );
     }
 
     setExpanded( node, expanded )
@@ -210,31 +216,58 @@ class RememberallDataProvider
 
     moveUp( node )
     {
-        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var temp = itemNodes[ index ];
-        itemNodes[ index ] = itemNodes[ index - 1 ];
-        itemNodes[ index - 1 ] = temp;
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var temp = nodes[ index ];
+        nodes[ index ] = nodes[ index - 1 ];
+        nodes[ index - 1 ] = temp;
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
         this.refresh();
     }
 
     moveDown( node )
     {
-        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var temp = itemNodes[ index ];
-        itemNodes[ index ] = itemNodes[ index + 1 ];
-        itemNodes[ index + 1 ] = temp;
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var temp = nodes[ index ];
+        nodes[ index ] = this.itemNodes[ index + 1 ];
+        nodes[ index + 1 ] = temp;
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
         this.refresh();
     }
 
     makeChild( node )
     {
-        var index = itemNodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var parent = itemNodes[ index - 1 ];
-        var child = itemNodes.splice( index, 1 );
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var parent = nodes[ index - 1 ];
+        var child = nodes.splice( index, 1 );
+        child.parent = parent;
         parent.nodes.push( child[ 0 ] );
-        this._context.globalState.update( 'rememberall.items', itemNodes );
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
+        this.refresh();
+    }
+
+    unparent( node )
+    {
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
+        var parent = node.parent;
+        var grandparent = parent.parent;
+        var child = nodes.splice( index, 1 );
+        if( grandparent )
+        {
+            child.parent = grandparent;
+            var parentIndex = grandparent.nodes.map( function( e ) { return e.id; } ).indexOf( parent.id );
+            grandparent.nodes.splice( parentIndex + 1, 0, child[ 0 ] );
+        }
+        else
+        {
+            child.parent = undefined;
+            var parentIndex = this.itemNodes.map( function( e ) { return e.id; } ).indexOf( parent.id );
+            this.itemNodes.splice( parentIndex + 1, 0, child[ 0 ] );
+        }
+        this._context.globalState.update( 'rememberall.items', this.itemNodes );
         this.refresh();
     }
 }

@@ -86,14 +86,19 @@
                     "group": "inline@3"
                 },
                 {
+                    "command": "rememberall.unparent",
+                    "when": "view =~ /rememberall/ && viewItem =~ /canUnparent/",
+                    "group": "inline@4"
+                },
+                {
                     "command": "rememberall.edit",
                     "when": "view =~ /rememberall/ && viewItem =~ /canEdit/",
-                    "group": "inline@4"
+                    "group": "inline@5"
                 },
                 {
                     "command": "rememberall.remove",
                     "when": "view =~ /rememberall/ && viewItem =~ /canDelete/",
-                    "group": "inline@5"
+                    "group": "inline@6"
                 }
             ]
         },
@@ -214,11 +219,20 @@
             },
             {
                 "command": "rememberall.makeChild",
-                "title": "Make Child",
+                "title": "Make Child of Above Item",
                 "category": "Rememberall",
                 "icon": {
-                    "dark": "resources/icons/dark/tree.svg",
-                    "light": "resources/icons/light/tree.svg"
+                    "dark": "resources/icons/dark/make-child.svg",
+                    "light": "resources/icons/light/make-child.svg"
+                }
+            },
+            {
+                "command": "rememberall.unparent",
+                "title": "Unparent",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/unparent.svg",
+                    "light": "resources/icons/light/unparent.svg"
                 }
             }
         ]

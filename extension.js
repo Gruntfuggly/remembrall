@@ -42,6 +42,9 @@ function activate( context )
         {
             rememberallTree.refresh();
         }
+
+        context.globalState.update( 'rememberall.lastSync', undefined );
+
         storage.sync( onSync );
     }
 
@@ -160,42 +163,25 @@ function activate( context )
         }
     }
 
-    function moveUp( node )
+    function nodeFunction( method, node )
     {
         node = node ? node : selectedNode();
 
         if( node )
         {
-            rememberallTree.moveUp( node );
+            method.call( rememberallTree, node );
             storage.triggerBackup();
         }
     }
 
-    function moveDown( node )
-    {
-        node = node ? node : selectedNode();
-
-        if( node )
-        {
-            rememberallTree.moveDown( node );
-            storage.triggerBackup();
-        }
-    }
-
-    function makeChild( node )
-    {
-        node = node ? node : selectedNode();
-
-        if( node )
-        {
-            rememberallTree.makeChild( node );
-            storage.triggerBackup();
-        }
-    }
+    function moveUp( node ) { nodeFunction( rememberallTree.moveUp, node ); }
+    function moveDown( node ) { nodeFunction( rememberallTree.moveDown, node ); }
+    function makeChild( node ) { nodeFunction( rememberallTree.makeChild, node ); }
+    function unparent( node ) { nodeFunction( rememberallTree.unparent, node ); }
 
     function resetCache()
     {
-        context.globalState.update( 'rememberall.lastSync', undefined );
+        // context.globalState.update( 'rememberall.lastSync', undefined );
 
         // context.workspaceState.update( 'rememberall.expanded', undefined );
         // context.workspaceState.update( 'rememberall.expandedNodes', undefined );
@@ -224,6 +210,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveUp', moveUp ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveDown', moveDown ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.makeChild', makeChild ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.unparent', unparent ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetSync', storage.resetSync ) );
 
         context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
