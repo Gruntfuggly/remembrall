@@ -44,28 +44,23 @@
         "menus": {
             "view/title": [
                 {
-                    "command": "rememberall.authorize",
-                    "when": "view =~ /rememberall/ && !rememberall-is-authorized",
-                    "group": "navigation@1"
-                },
-                {
                     "command": "rememberall.create",
-                    "when": "view =~ /rememberall/ && rememberall-is-authorized",
+                    "when": "view =~ /rememberall/",
                     "group": "navigation@1"
                 },
                 {
                     "command": "rememberall.refresh",
-                    "when": "view =~ /rememberall/ && rememberall-is-authorized",
+                    "when": "view =~ /rememberall/",
                     "group": "navigation@2"
                 },
                 {
                     "command": "rememberall.expand",
-                    "when": "view =~ /rememberall/ && rememberall-show-expand && rememberall-tree-has-content && rememberall-is-authorized",
+                    "when": "view =~ /rememberall/ && rememberall-show-expand && rememberall-tree-has-content",
                     "group": "navigation@3"
                 },
                 {
                     "command": "rememberall.collapse",
-                    "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content && rememberall-is-authorized",
+                    "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content",
                     "group": "navigation@3"
                 }
             ],
@@ -113,6 +108,11 @@
                 "rememberall.showInExplorer": {
                     "type": "boolean",
                     "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
+                    "default": true
+                },
+                "rememberall.confirmRemove": {
+                    "type": "boolean",
+                    "markdownDescription": "Set to false to disable the remove confirmation prompt",
                     "default": true
                 },
                 "rememberall.syncEnabled": {
@@ -175,6 +175,15 @@
             {
                 "command": "rememberall.create",
                 "title": "Create New Item",
+                "category": "Rememberall",
+                "icon": {
+                    "dark": "resources/icons/dark/add.svg",
+                    "light": "resources/icons/light/add.svg"
+                }
+            },
+            {
+                "command": "rememberall.createFromSelection",
+                "title": "Create New Item From Selection",
                 "category": "Rememberall",
                 "icon": {
                     "dark": "resources/icons/dark/add.svg",

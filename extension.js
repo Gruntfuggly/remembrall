@@ -55,15 +55,12 @@ function activate( context )
         var showTree = true;
         var expanded = context.workspaceState.get( 'rememberall.expanded' );
         var showInExplorer = vscode.workspace.getConfiguration( 'rememberall' ).get( 'showInExplorer' );
-        // var authorized = context.globalState.get( 'calendar.google.token' ) ? true : false;
-        var authorized = true;
 
         vscode.commands.executeCommand( 'setContext', 'rememberall-show-expand', !expanded );
         vscode.commands.executeCommand( 'setContext', 'rememberall-show-collapse', expanded );
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', showTree );
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', rememberallTree.hasContent() );
         vscode.commands.executeCommand( 'setContext', 'rememberall-in-explorer', showInExplorer );
-        vscode.commands.executeCommand( 'setContext', 'rememberall-is-authorized', authorized );
     }
 
     function collapse()
@@ -112,11 +109,32 @@ function activate( context )
         {
             if( item )
             {
-                rememberallTree.add( { label: item } );
+                rememberallTree.add( { label: item }, selectedNode() );
                 rememberallTree.refresh();
                 storage.triggerBackup();
             }
         } );
+    }
+
+    function createFromSelection()
+    {
+        var editor = vscode.window.activeTextEditor;
+        if( editor && editor.selections )
+        {
+            var currentNode = selectedNode();
+            editor.selections.reverse().map( function( selection )
+            {
+                if( selection.start != selection.end )
+                {
+                    var document = editor.document;
+                    var content = document.getText().substring( document.offsetAt( selection.start ), document.offsetAt( selection.end ) );
+
+                    rememberallTree.add( { label: content }, currentNode );
+                }
+                rememberallTree.refresh();
+                storage.triggerBackup();
+            } );
+        }
     }
 
     function remove( node )
@@ -125,15 +143,27 @@ function activate( context )
 
         if( node )
         {
-            vscode.window.showInformationMessage( "Are you sure you want to remove this item?", 'Yes', 'No' ).then( function( confirm )
+            function removeNode()
             {
-                if( confirm === 'Yes' )
+                rememberallTree.remove( node );
+                rememberallTree.refresh();
+                storage.triggerBackup();
+            }
+
+            if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'confirmRemove' ) === true )
+            {
+                vscode.window.showInformationMessage( "Are you sure you want to remove this item?", 'Yes', 'No' ).then( function( confirm )
                 {
-                    rememberallTree.remove( node );
-                    rememberallTree.refresh();
-                    storage.triggerBackup();
-                }
-            } );
+                    if( confirm === 'Yes' )
+                    {
+                        removeNode();
+                    }
+                } );
+            }
+            else
+            {
+                removeNode();
+            }
         }
         else
         {
@@ -183,12 +213,8 @@ function activate( context )
 
     function resetCache()
     {
-        // context.globalState.update( 'rememberall.lastSync', undefined );
-
-        // context.workspaceState.update( 'rememberall.expanded', undefined );
-        // context.workspaceState.update( 'rememberall.expandedNodes', undefined );
-
-        // purgeFolder( context.globalStoragePath );
+        context.workspaceState.update( 'rememberall.expanded', undefined );
+        context.workspaceState.update( 'rememberall.expandedNodes', undefined );
 
         debug( "Cache cleared" );
 
@@ -201,12 +227,12 @@ function activate( context )
 
         vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
 
-        // context.subscriptions.push( vscode.commands.registerCommand( 'calendar.authorize', refresh ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.refresh', refresh ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.expand', expand ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.collapse', collapse ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetCache', resetCache ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.create', create ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.createFromSelection', createFromSelection ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveUp', moveUp ) );

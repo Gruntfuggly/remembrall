@@ -4,8 +4,6 @@ var path = require( 'path' );
 var expandedNodes = {};
 var nodeCounter = 1;
 
-var ITEM = "ITEM";
-
 function uuidv4()
 {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function( c )
@@ -55,7 +53,7 @@ class RememberallDataProvider
             {
                 return this.itemNodes;
             }
-            return [ { label: "Nothing found" } ];
+            return [ { label: "Click + to add new items..." } ];
         }
         else if( node.nodes )
         {
@@ -101,7 +99,7 @@ class RememberallDataProvider
             }
             else
             {
-                treeItem.collapsibleState = ( this._context.workspaceState.get( 'rememberall.expandedNodes' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
+                treeItem.collapsibleState = ( this._context.workspaceState.get( 'rememberall.expanded' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
             }
         }
 
@@ -115,10 +113,16 @@ class RememberallDataProvider
         this.itemNodes = [];
     }
 
-    add( item )
+    locateNode( node )
+    {
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.uniqueId; } ).indexOf( node.uniqueId );
+        return { nodes: nodes, index: index };
+    }
+
+    add( item, selectedNode )
     {
         var itemNode = {
-            type: ITEM,
             id: nodeCounter++,
             uniqueId: uuidv4(),
             label: item.label,
@@ -126,7 +130,15 @@ class RememberallDataProvider
             nodes: []
         };
 
-        this.itemNodes.push( itemNode );
+        if( selectedNode )
+        {
+            var located = this.locateNode( selectedNode );
+            located.nodes.splice( located.index + 1, 0, itemNode );
+        }
+        else
+        {
+            this.itemNodes.push( itemNode );
+        }
 
         this.resetOrder( this.itemNodes );
 
@@ -137,13 +149,6 @@ class RememberallDataProvider
     {
         item.label = update;
         this._context.globalState.update( 'rememberall.items', this.itemNodes );
-    }
-
-    locateNode( node )
-    {
-        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
-        var index = nodes.map( function( e ) { return e.uniqueId; } ).indexOf( node.uniqueId );
-        return { nodes: nodes, index: index };
     }
 
     remove( node )
@@ -204,7 +209,6 @@ class RememberallDataProvider
         this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
         this.rebuild();
         this.resetOrder( this.itemNodes );
-        this._context.workspaceState.update( 'rememberall.nodeCounter', nodeCounter )
         this._context.globalState.update( 'rememberall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', this.itemNodes.length > 0 );
