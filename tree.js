@@ -170,6 +170,10 @@ class RememberallDataProvider
         nodes.forEach( function( node )
         {
             node.id = nodeCounter++;
+            if( !node.uniqueId )
+            {
+                node.uniqueId = uuidv4();
+            }
             node.contextValue = '';
             if( parent )
             {

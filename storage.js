@@ -37,7 +37,6 @@ function cleanNodes( nodes )
     return nodes.map( function( node )
     {
         var cleaned = {
-            type: node.type,
             label: node.label,
             icon: node.icon,
             uniqueId: node.uniqueId,
