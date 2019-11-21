@@ -17,10 +17,9 @@ function uuidv4()
 
 class RememberallDataProvider
 {
-    constructor( _context, outputChannel )
+    constructor( _context )
     {
         this._context = _context;
-        this.outputChannel = outputChannel;
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -28,6 +27,11 @@ class RememberallDataProvider
         expandedNodes = _context.workspaceState.get( 'rememberall.expandedNodes', {} );
 
         this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+    }
+
+    setOutputChannel( outputChannel )
+    {
+        this.outputChannel = outputChannel;
     }
 
     debug( text )
@@ -131,23 +135,21 @@ class RememberallDataProvider
 
     edit( item, update )
     {
-        this.itemNodes.forEach( function( node, index )
-        {
-            if( node.id === item.id )
-            {
-                this[ index ].label = update;
-            }
-        }, this.itemNodes );
-
+        item.label = update;
         this._context.globalState.update( 'rememberall.items', this.itemNodes );
     }
 
-    remove( item )
+    locateNode( node )
     {
-        this.itemNodes = this.itemNodes.filter( function( node )
-        {
-            return node.id !== item.id;
-        } );
+        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
+        var index = nodes.map( function( e ) { return e.uniqueId; } ).indexOf( node.uniqueId );
+        return { nodes: nodes, index: index };
+    }
+
+    remove( node )
+    {
+        var located = this.locateNode( node );
+        located.nodes.splice( located.index, 1 );
 
         this.resetOrder( this.itemNodes );
 
@@ -163,7 +165,7 @@ class RememberallDataProvider
         nodes.forEach( function( node )
         {
             node.id = nodeCounter++;
-            node.contextValue = node.contextValue || '';
+            node.contextValue = '';
             if( parent )
             {
                 node.parent = parent;
@@ -180,7 +182,6 @@ class RememberallDataProvider
     {
         nodes = nodes.map( function( node, index )
         {
-            node.contextValue = node.contextValue || ''
             node.contextValue += 'canEdit canDelete';
             if( index !== 0 )
             {
@@ -201,8 +202,8 @@ class RememberallDataProvider
     refresh()
     {
         this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
-        this.resetOrder( this.itemNodes );
         this.rebuild();
+        this.resetOrder( this.itemNodes );
         this._context.workspaceState.update( 'rememberall.nodeCounter', nodeCounter )
         this._context.globalState.update( 'rememberall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
@@ -221,61 +222,64 @@ class RememberallDataProvider
         this._context.workspaceState.update( 'rememberall.expandedNodes', expandedNodes );
     }
 
+    swap( nodes, firstIndex, secondIndex )
+    {
+        var temp = nodes[ firstIndex ];
+        nodes[ firstIndex ] = nodes[ secondIndex ];
+        nodes[ secondIndex ] = temp;
+    }
+
     moveUp( node )
     {
-        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
-        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var temp = nodes[ index ];
-        nodes[ index ] = nodes[ index - 1 ];
-        nodes[ index - 1 ] = temp;
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
-        this.refresh();
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
+        {
+            this.swap( located.nodes, located.index, located.index - 1 );
+            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this.refresh();
+        }
     }
 
     moveDown( node )
     {
-        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
-        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var temp = nodes[ index ];
-        nodes[ index ] = this.itemNodes[ index + 1 ];
-        nodes[ index + 1 ] = temp;
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
-        this.refresh();
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
+        {
+            this.swap( located.nodes, located.index, located.index + 1 );
+            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this.refresh();
+        }
     }
 
     makeChild( node )
     {
-        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
-        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var parent = nodes[ index - 1 ];
-        var child = nodes.splice( index, 1 );
-        child.parent = parent;
-        parent.nodes.push( child[ 0 ] );
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
-        this.refresh();
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
+        {
+            var parent = located.nodes[ located.index - 1 ];
+            var child = located.nodes.splice( located.index, 1 );
+            child.parent = parent;
+            parent.nodes.push( child[ 0 ] );
+            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this.refresh();
+        }
     }
 
     unparent( node )
     {
-        var nodes = node.parent ? node.parent.nodes : this.itemNodes;
-        var index = nodes.map( function( e ) { return e.id; } ).indexOf( node.id );
-        var parent = node.parent;
-        var grandparent = parent.parent;
-        var child = nodes.splice( index, 1 );
-        if( grandparent )
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
         {
-            child.parent = grandparent;
-            var parentIndex = grandparent.nodes.map( function( e ) { return e.id; } ).indexOf( parent.id );
-            grandparent.nodes.splice( parentIndex + 1, 0, child[ 0 ] );
+            var parent = node.parent;
+            var grandparent = parent.parent;
+            var child = located.nodes.splice( located.index, 1 )[ 0 ];
+            child.parent = grandparent ? grandparent : undefined;
+            var parentNodes = grandparent ? grandparent.nodes : this.itemNodes;
+            var parentIndex = parentNodes.map( function( e ) { return e.uniqueId; } ).indexOf( parent.uniqueId );
+            parentNodes.splice( parentIndex + 1, 0, child );
+            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this.refresh();
         }
-        else
-        {
-            child.parent = undefined;
-            var parentIndex = this.itemNodes.map( function( e ) { return e.id; } ).indexOf( parent.id );
-            this.itemNodes.splice( parentIndex + 1, 0, child[ 0 ] );
-        }
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
-        this.refresh();
     }
 }
 

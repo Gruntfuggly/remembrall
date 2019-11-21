@@ -7,7 +7,7 @@ function activate( context )
 {
     var outputChannel;
 
-    var rememberallTree = new tree.RememberallDataProvider( context, outputChannel );
+    var rememberallTree = new tree.RememberallDataProvider( context );
 
     var rememberallViewExplorer = vscode.window.createTreeView( "rememberall-explorer", { treeDataProvider: rememberallTree } );
     var rememberallView = vscode.window.createTreeView( "rememberall", { treeDataProvider: rememberallTree } );
@@ -27,11 +27,13 @@ function activate( context )
             outputChannel.dispose();
             outputChannel = undefined;
             storage.setOutputChannel( undefined );
+            rememberallTree.setOutputChannel( undefined );
         }
         if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'debug' ) === true )
         {
             outputChannel = vscode.window.createOutputChannel( "Rememberall" );
             storage.setOutputChannel( outputChannel );
+            rememberallTree.setOutputChannel( outputChannel );
             debug( "Ready" );
         }
     }
