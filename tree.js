@@ -143,6 +143,8 @@ class RememberallDataProvider
         this.resetOrder( this.itemNodes );
 
         this._context.globalState.update( 'rememberall.items', this.itemNodes );
+
+        return itemNode;
     }
 
     edit( item, update )

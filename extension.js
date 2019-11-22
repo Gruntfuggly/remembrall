@@ -103,14 +103,27 @@ function activate( context )
         return result;
     }
 
+    function selectNode( node )
+    {
+        if( rememberallViewExplorer && rememberallViewExplorer.visible === true )
+        {
+            rememberallViewExplorer.reveal( node, { select: true } );
+        }
+        if( rememberallView && rememberallView.visible === true )
+        {
+            rememberallView.reveal( node, { select: true } );
+        }
+    }
+
     function create()
     {
         vscode.window.showInputBox( { placeHolder: "Enter something to remember..." } ).then( function( item )
         {
             if( item )
             {
-                rememberallTree.add( { label: item }, selectedNode() );
+                var node = rememberallTree.add( { label: item }, selectedNode() );
                 rememberallTree.refresh();
+                selectNode( node );
                 storage.triggerBackup();
             }
         } );
@@ -122,6 +135,7 @@ function activate( context )
         if( editor && editor.selections )
         {
             var currentNode = selectedNode();
+            var newNode;
             editor.selections.reverse().map( function( selection )
             {
                 if( selection.start != selection.end )
@@ -129,9 +143,10 @@ function activate( context )
                     var document = editor.document;
                     var content = document.getText().substring( document.offsetAt( selection.start ), document.offsetAt( selection.end ) );
 
-                    rememberallTree.add( { label: content }, currentNode );
+                    newNode = rememberallTree.add( { label: content }, currentNode );
                 }
                 rememberallTree.refresh();
+                selectNode( newNode );
                 storage.triggerBackup();
             } );
         }
