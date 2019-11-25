@@ -118,7 +118,7 @@
                 "rememberall.syncEnabled": {
                     "type": "boolean",
                     "description": "Enable syncing via gist",
-                    "default": true
+                    "default": false
                 },
                 "rememberall.syncToken": {
                     "type": "string",
@@ -131,15 +131,6 @@
             }
         },
         "commands": [
-            {
-                "command": "rememberall.authorize",
-                "title": "Authorize",
-                "category": "Rememberall",
-                "icon": {
-                    "dark": "resources/icons/dark/authorize.svg",
-                    "light": "resources/icons/light/authorize.svg"
-                }
-            },
             {
                 "command": "rememberall.resetCache",
                 "title": "Reset Cache",
