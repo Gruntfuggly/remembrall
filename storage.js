@@ -6,6 +6,26 @@ var active = false;
 var state;
 var backupTimer;
 var queue = [];
+var version;
+
+function compareVersions( a, b )
+{
+    var i, diff;
+    var regExStrip0 = /(\.0+)+$/;
+    var segmentsA = a.replace( regExStrip0, '' ).split( '.' );
+    var segmentsB = b.replace( regExStrip0, '' ).split( '.' );
+    var l = Math.min( segmentsA.length, segmentsB.length );
+
+    for( i = 0; i < l; i++ )
+    {
+        diff = parseInt( segmentsA[ i ], 10 ) - parseInt( segmentsB[ i ], 10 );
+        if( diff )
+        {
+            return diff;
+        }
+    }
+    return segmentsA.length - segmentsB.length;
+}
 
 function initialize( globalState, outputChannel )
 {
@@ -50,8 +70,10 @@ function cleanNodes( nodes )
     } );
 }
 
-function initializeSync()
+function initializeSync( currentVersion )
 {
+    version = currentVersion;
+
     var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
     var token = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken', undefined );
     var gistId = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncGistId', undefined );
@@ -75,6 +97,7 @@ function initializeSync()
                     rememberallSync: {
                         items: cleanNodes( state.get( 'rememberall.items' ) || [] ),
                         nodeCounter: state.get( 'rememberall.nodeCounter' ),
+                        version: version,
                         lastSync: new Date()
                     }
                 } )
@@ -117,9 +140,17 @@ function sync( callback )
 
                 if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'rememberall.lastSync' ) )
                 {
-                    state.update( 'rememberall.items', data.rememberallSync.items );
-                    state.update( 'rememberall.nodeCounter', data.rememberallSync.nodeCounter );
-                    state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+                    var storedVersion = state.get( 'rememberall.version' );
+                    if( storedVersion !== undefined && compareVersions( version, storedVersion ) >= 0 )
+                    {
+                        state.update( 'rememberall.items', data.rememberallSync.items );
+                        state.update( 'rememberall.nodeCounter', data.rememberallSync.nodeCounter );
+                        state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+                    }
+                    else
+                    {
+                        debug( "Ignoring synced state from older version" );
+                    }
                 }
 
                 if( callback )
@@ -182,24 +213,54 @@ function backup()
     {
         if( gistore.token )
         {
-            var now = new Date();
-
-            debug( "Starting backup at " + now.toISOString() );
-
-            gistore.backUp( {
-                rememberallSync: {
-                    items: cleanNodes( state.get( 'rememberall.items' ) || [] ),
-                    nodeCounter: state.get( 'rememberall.nodeCounter' ),
-                    lastSync: now
-                }
-            } ).then( function()
+            gistore.sync().then( function( data )
             {
-                debug( "Backup at " + now.toISOString() );
-                processQueue();
+                var storedVersion = state.get( 'rememberall.version' );
+                if( storedVersion !== undefined && compareVersions( version, storedVersion ) >= 0 )
+                {
+                    var cleanedNodes = cleanNodes( state.get( 'rememberall.items' ) || [] );
+
+                    if( data.rememberallSync.items !== cleanedNodes )
+                    {
+                        var now = new Date();
+
+                        debug( "Starting backup at " + now.toISOString() );
+
+                        gistore.backUp( {
+                            rememberallSync: {
+                                items: cleanedNodes,
+                                nodeCounter: state.get( 'rememberall.nodeCounter' ),
+                                version: version,
+                                lastSync: now
+                            }
+                        } ).then( function()
+                        {
+                            debug( "Backup at " + now.toISOString() );
+                            processQueue();
+                        } ).catch( function( error )
+                        {
+                            console.error( "backup failed: " + error );
+                            triggerBackup();
+                            processQueue();
+                        } );
+                    }
+                    else
+                    {
+                        debug( "Ignoring unchanged data" );
+                        processQueue();
+                    }
+                }
+                else
+                {
+                    debug( "Ignoring synced state from older version" );
+                }
             } ).catch( function( error )
             {
-                console.error( "backup failed: " + error );
-                triggerBackup();
+                if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken' ) )
+                {
+                    debug( "sync failed:" + error );
+                }
+
                 processQueue();
             } );
         }

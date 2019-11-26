@@ -1,5 +1,6 @@
 
 var vscode = require( 'vscode' );
+var path = require( 'path' );
 var tree = require( './tree' );
 var storage = require( './storage' );
 
@@ -277,7 +278,9 @@ function activate( context )
                     e.affectsConfiguration( 'rememberall.syncEnabled' ) ||
                     e.affectsConfiguration( 'rememberall.syncGistId' ) )
                 {
-                    storage.initializeSync();
+                    var extensionPath = path.join( context.extensionPath, "package.json" );
+                    var packageFile = JSON.parse( fs.readFileSync( extensionPath, 'utf8' ) );
+                    storage.initializeSync( packageFile.version );
                     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
                     {
                         refresh();
