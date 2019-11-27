@@ -1,5 +1,6 @@
 
 var vscode = require( 'vscode' );
+var fs = require( 'fs' );
 var path = require( 'path' );
 var tree = require( './tree' );
 var storage = require( './storage' );
@@ -12,6 +13,13 @@ function activate( context )
 
     var rememberallViewExplorer = vscode.window.createTreeView( "rememberall-explorer", { treeDataProvider: rememberallTree } );
     var rememberallView = vscode.window.createTreeView( "rememberall", { treeDataProvider: rememberallTree } );
+
+    function extensionVersion()
+    {
+        var extensionPath = path.join( context.extensionPath, "package.json" );
+        var packageFile = JSON.parse( fs.readFileSync( extensionPath, 'utf8' ) );
+        return packageFile.version;
+    }
 
     function debug( text )
     {
@@ -239,7 +247,7 @@ function activate( context )
 
     function register()
     {
-        storage.initialize( context.globalState );
+        storage.initialize( context.globalState, extensionVersion() );
 
         vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
 
@@ -278,13 +286,13 @@ function activate( context )
                     e.affectsConfiguration( 'rememberall.syncEnabled' ) ||
                     e.affectsConfiguration( 'rememberall.syncGistId' ) )
                 {
-                    var extensionPath = path.join( context.extensionPath, "package.json" );
-                    var packageFile = JSON.parse( fs.readFileSync( extensionPath, 'utf8' ) );
-                    storage.initializeSync( packageFile.version );
-                    if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
+                    storage.initializeSync( extensionVersion, function()
                     {
-                        refresh();
-                    }
+                        if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
+                        {
+                            refresh();
+                        }
+                    } );
                 }
                 else if( e.affectsConfiguration( 'rememberall.syncToken' ) )
                 {

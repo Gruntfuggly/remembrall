@@ -28,12 +28,11 @@ function compareVersions( a, b )
     return segmentsA.length - segmentsB.length;
 }
 
-function initialize( globalState, outputChannel )
+function initialize( globalState, currentVersion )
 {
     state = globalState;
-    generalOutputChannel = outputChannel;
 
-    initializeSync();
+    initializeSync( currentVersion );
 }
 
 function setOutputChannel( outputChannel )
@@ -71,7 +70,7 @@ function cleanNodes( nodes )
     } );
 }
 
-function initializeSync( currentVersion )
+function initializeSync( currentVersion, callback )
 {
     version = currentVersion;
 
@@ -88,6 +87,11 @@ function initializeSync( currentVersion )
             debug( "Reading from gist " + gistId );
 
             gistore.setId( gistId );
+
+            if( callback )
+            {
+                callback();
+            }
         }
         else
         {
@@ -106,8 +110,17 @@ function initializeSync( currentVersion )
                 {
                     debug( "New gist " + id );
                     vscode.workspace.getConfiguration( 'rememberall' ).update( 'syncGistId', id, true );
+
+                    if( callback )
+                    {
+                        callback();
+                    }
                 } );
         }
+    }
+    else if( callback )
+    {
+        callback();
     }
 }
 
@@ -151,25 +164,25 @@ function sync( callback )
                     var storedVersion = state.get( 'rememberall.version' );
                     if( storedVersion !== undefined && compareVersions( version, storedVersion ) >= 0 )
                     {
-                    if( data.rememberallSync.lastSync < lastBackup )
-                    {
-                        vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                        if( data.rememberallSync.lastSync < lastBackup )
                         {
-                            if( confirm === 'Overwrite' )
+                            vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                             {
-                                doUpdate();
-                            }
-                            else
-                            {
-                                sync();
-                            }
-                        } );
+                                if( confirm === 'Overwrite' )
+                                {
+                                    doUpdate();
+                                }
+                                else
+                                {
+                                    sync();
+                                }
+                            } );
+                        }
+                        else
+                        {
+                            doUpdate();
+                        }
                     }
-                    else
-                    {
-                        doUpdate();
-                    }
-                }
                     else
                     {
                         debug( "Ignoring synced state from older version" );
@@ -239,31 +252,31 @@ function backup()
             gistore.sync().then( function( data )
             {
                 var storedVersion = state.get( 'rememberall.version' );
-                if( storedVersion !== undefined && compareVersions( version, storedVersion ) >= 0 )
+                if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                 {
                     var cleanedNodes = cleanNodes( state.get( 'rememberall.items' ) || [] );
 
                     if( data.rememberallSync.items !== cleanedNodes )
                     {
-            var now = new Date();
+                        var now = new Date();
 
-            debug( "Starting backup at " + now.toISOString() );
+                        debug( "Starting backup at " + now.toISOString() );
 
-            gistore.backUp( {
-                rememberallSync: {
+                        gistore.backUp( {
+                            rememberallSync: {
                                 items: cleanedNodes,
-                    nodeCounter: state.get( 'rememberall.nodeCounter' ),
+                                nodeCounter: state.get( 'rememberall.nodeCounter' ),
                                 version: version,
-                    lastSync: now
-                }
-            } ).then( function()
-            {
-                debug( "Backup at " + now.toISOString() );
-                processQueue();
-            } ).catch( function( error )
-            {
-                console.error( "backup failed: " + error );
-                triggerBackup();
+                                lastSync: now
+                            }
+                        } ).then( function()
+                        {
+                            debug( "Backup at " + now.toISOString() );
+                            processQueue();
+                        } ).catch( function( error )
+                        {
+                            console.error( "backup failed: " + error );
+                            triggerBackup();
                             processQueue();
                         } );
                     }
