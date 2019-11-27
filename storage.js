@@ -4,6 +4,7 @@ var gistore = require( 'gistore' );
 var generalOutputChannel;
 var active = false;
 var state;
+var lastBackup = new Date();
 var backupTimer;
 var queue = [];
 var version;
@@ -134,6 +135,13 @@ function sync( callback )
         {
             gistore.sync().then( function( data )
             {
+                function doUpdate()
+                {
+                    state.update( 'rememberall.items', data.rememberallSync.items );
+                    state.update( 'rememberall.nodeCounter', data.rememberallSync.nodeCounter );
+                    state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+                }
+
                 var now = new Date();
 
                 debug( "Sync at " + now.toISOString() );
@@ -143,10 +151,25 @@ function sync( callback )
                     var storedVersion = state.get( 'rememberall.version' );
                     if( storedVersion !== undefined && compareVersions( version, storedVersion ) >= 0 )
                     {
-                        state.update( 'rememberall.items', data.rememberallSync.items );
-                        state.update( 'rememberall.nodeCounter', data.rememberallSync.nodeCounter );
-                        state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+                    if( data.rememberallSync.lastSync < lastBackup )
+                    {
+                        vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                        {
+                            if( confirm === 'Overwrite' )
+                            {
+                                doUpdate();
+                            }
+                            else
+                            {
+                                sync();
+                            }
+                        } );
                     }
+                    else
+                    {
+                        doUpdate();
+                    }
+                }
                     else
                     {
                         debug( "Ignoring synced state from older version" );
@@ -222,25 +245,25 @@ function backup()
 
                     if( data.rememberallSync.items !== cleanedNodes )
                     {
-                        var now = new Date();
+            var now = new Date();
 
-                        debug( "Starting backup at " + now.toISOString() );
+            debug( "Starting backup at " + now.toISOString() );
 
-                        gistore.backUp( {
-                            rememberallSync: {
+            gistore.backUp( {
+                rememberallSync: {
                                 items: cleanedNodes,
-                                nodeCounter: state.get( 'rememberall.nodeCounter' ),
+                    nodeCounter: state.get( 'rememberall.nodeCounter' ),
                                 version: version,
-                                lastSync: now
-                            }
-                        } ).then( function()
-                        {
-                            debug( "Backup at " + now.toISOString() );
-                            processQueue();
-                        } ).catch( function( error )
-                        {
-                            console.error( "backup failed: " + error );
-                            triggerBackup();
+                    lastSync: now
+                }
+            } ).then( function()
+            {
+                debug( "Backup at " + now.toISOString() );
+                processQueue();
+            } ).catch( function( error )
+            {
+                console.error( "backup failed: " + error );
+                triggerBackup();
                             processQueue();
                         } );
                     }
@@ -284,6 +307,8 @@ function backup()
 
 function triggerBackup()
 {
+    lastBackup = new Date();
+
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
         debug( "Backing up in 1 second..." );
