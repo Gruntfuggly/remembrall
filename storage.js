@@ -159,22 +159,29 @@ function sync( callback )
 
                 debug( "Checking local data against backup..." );
 
-                if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > state.get( 'rememberall.lastSync' ) )
+                debug( "local:" + new Date( state.get( 'rememberall.lastSync' ) ) );
+                debug( "remote:" + new Date( data.rememberallSync.lastSync ) );
+                if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > new Date( state.get( 'rememberall.lastSync' ) ) )
                 {
+                    debug( "Checking version..." );
                     var storedVersion = state.get( 'rememberall.version' );
                     if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                     {
-                        if( data.rememberallSync.lastSync < lastBackup )
+                        debug( "Checking time..." );
+                        debug( "last backup:" + lastBackup );
+                        if( new Date( data.rememberallSync.lastSync ) < lastBackup )
                         {
                             vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                             {
                                 if( confirm === 'Overwrite' )
                                 {
+                                    debug( "Overwrite" );
                                     doUpdate();
                                 }
                                 else
                                 {
-                                    sync();
+                                    debug( "Keep Local" );
+                                    triggerBackup();
                                 }
                             } );
                         }
@@ -187,6 +194,10 @@ function sync( callback )
                     {
                         debug( "Ignoring synced state from older version" );
                     }
+                }
+                else
+                {
+                    debug( "Ignoring remote data" );
                 }
 
                 if( callback )
@@ -359,6 +370,7 @@ function triggerBackup()
 {
     lastBackup = new Date();
 
+    debug( "set lastBackup: " + lastBackup );
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
         debug( "Backing up in 1 second..." );
