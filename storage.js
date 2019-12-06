@@ -176,6 +176,12 @@ function sync( callback )
 
                     state.update( 'rememberall.items', data.rememberallSync.items );
                     state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+
+                    if( callback )
+                    {
+                        debug( "Callback..." );
+                        callback();
+                    }
                 }
 
                 var now = new Date();
@@ -221,11 +227,6 @@ function sync( callback )
                 else
                 {
                     debug( "Ignoring remote data" );
-                }
-
-                if( callback )
-                {
-                    callback();
                 }
 
                 processQueue();
