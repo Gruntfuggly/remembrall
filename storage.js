@@ -44,9 +44,9 @@ function initialize( globalState, currentVersion )
     logFish( "initialize", 1 );
     initializeSync( currentVersion );
     var storedDate = globalState.get( 'rememberall.lastBackup' );
-    debug( "storedDate:" + storedDate );
     if( storedDate )
     {
+        debug( "Last backup: " + lastBackup );
         lastBackup = new Date( storedDate );
     }
 }
@@ -184,49 +184,70 @@ function sync( callback )
                     }
                 }
 
-                var now = new Date();
+                var cleanedNodes = cleanNodes( state.get( 'rememberall.items' ) || [] );
 
-                debug( "Checking local data against backup..." );
-
-                debug( " local timestamp:" + new Date( state.get( 'rememberall.lastSync' ) ) );
-                debug( " remote timestamp:" + new Date( data.rememberallSync.lastSync ) );
-                if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > new Date( state.get( 'rememberall.lastSync' ) ) )
+                if( JSON.stringify( data.rememberallSync.items ) !== JSON.stringify( cleanedNodes ) )
                 {
-                    debug( "Checking version..." );
-                    var storedVersion = state.get( 'rememberall.version' );
-                    if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
+                    var now = new Date();
+
+                    debug( "Checking local data against backup..." );
+
+                    debug( " local timestamp:" + new Date( state.get( 'rememberall.lastSync' ) ) );
+                    debug( " remote timestamp:" + new Date( data.rememberallSync.lastSync ) );
+                    if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > new Date( state.get( 'rememberall.lastSync' ) ) )
                     {
-                        debug( " last backup:" + lastBackup );
-                        if( new Date( data.rememberallSync.lastSync ) < lastBackup )
+                        debug( "Checking version..." );
+                        var storedVersion = state.get( 'rememberall.version' );
+                        if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                         {
-                            debug( "local data newer than backup!" );
-                            vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                            debug( " last backup:" + lastBackup );
+                            if( new Date( data.rememberallSync.lastSync ) < lastBackup )
                             {
-                                if( confirm === 'Overwrite' )
+                                debug( "local data newer than backup!" );
+                                vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                                 {
-                                    debug( "Overwrite" );
-                                    doUpdate();
-                                }
-                                else
-                                {
-                                    debug( "Keep Local" );
-                                    triggerBackup();
-                                }
-                            } );
+                                    if( confirm === 'Overwrite' )
+                                    {
+                                        debug( "Overwrite" );
+                                        doUpdate();
+                                    }
+                                    else if( confirm === 'Keep Local' )
+                                    {
+                                        debug( "Keep Local" );
+                                        triggerBackup();
+                                    }
+                                } );
+                            }
+                            else
+                            {
+                                doUpdate();
+                            }
                         }
                         else
                         {
-                            doUpdate();
+                            debug( "Ignoring synced state from older version" );
+                            if( callback )
+                            {
+                                callback();
+                            }
                         }
                     }
                     else
                     {
-                        debug( "Ignoring synced state from older version" );
+                        debug( "Ignoring remote data" );
+                        if( callback )
+                        {
+                            callback();
+                        }
                     }
                 }
                 else
                 {
-                    debug( "Ignoring remote data" );
+                    debug( "Ignoring unchanged data" );
+                    if( callback )
+                    {
+                        callback();
+                    }
                 }
 
                 processQueue();
@@ -259,9 +280,9 @@ function sync( callback )
 
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
-        // queue.push( enqueue( doSync, this, [ callback ] ) );
+        queue.push( enqueue( doSync, this, [ callback ] ) );
 
-        // processQueue();
+        processQueue();
         doSync( callback );
     }
     else
