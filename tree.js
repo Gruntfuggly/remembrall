@@ -13,7 +13,7 @@ function uuidv4()
     } );
 }
 
-class RememberallDataProvider
+class RemembrallDataProvider
 {
     constructor( _context )
     {
@@ -22,9 +22,9 @@ class RememberallDataProvider
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-        expandedNodes = _context.workspaceState.get( 'rememberall.expandedNodes', {} );
+        expandedNodes = _context.workspaceState.get( 'remembrall.expandedNodes', {} );
 
-        this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+        this.itemNodes = this._context.globalState.get( 'remembrall.items' ) || [];
     }
 
     setOutputChannel( outputChannel )
@@ -99,7 +99,7 @@ class RememberallDataProvider
             }
             else
             {
-                treeItem.collapsibleState = ( this._context.workspaceState.get( 'rememberall.expanded' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
+                treeItem.collapsibleState = ( this._context.workspaceState.get( 'remembrall.expanded' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
             }
         }
 
@@ -126,7 +126,7 @@ class RememberallDataProvider
             id: nodeCounter++,
             uniqueId: uuidv4(),
             label: item.label,
-            icon: 'rememberall',
+            icon: 'remembrall',
             nodes: []
         };
 
@@ -142,7 +142,7 @@ class RememberallDataProvider
 
         this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
+        this._context.globalState.update( 'remembrall.items', this.itemNodes );
 
         return itemNode;
     }
@@ -150,7 +150,7 @@ class RememberallDataProvider
     edit( item, update )
     {
         item.label = update;
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
+        this._context.globalState.update( 'remembrall.items', this.itemNodes );
     }
 
     remove( node )
@@ -160,7 +160,7 @@ class RememberallDataProvider
 
         this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'rememberall.items', this.itemNodes );
+        this._context.globalState.update( 'remembrall.items', this.itemNodes );
     }
 
     rebuild( nodes, parent )
@@ -212,24 +212,24 @@ class RememberallDataProvider
 
     refresh()
     {
-        this.itemNodes = this._context.globalState.get( 'rememberall.items' ) || [];
+        this.itemNodes = this._context.globalState.get( 'remembrall.items' ) || [];
         this.rebuild();
         this.resetOrder( this.itemNodes );
-        this._context.globalState.update( 'rememberall.items', this.itemNodes )
+        this._context.globalState.update( 'remembrall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
-        vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', this.itemNodes.length > 0 );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', this.itemNodes.length > 0 );
     }
 
     setExpanded( node, expanded )
     {
         expandedNodes[ node.uniqueId ] = expanded;
-        this._context.workspaceState.update( 'rememberall.expandedNodes', expandedNodes );
+        this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
     }
 
     clearExpansionState()
     {
         expandedNodes = {};
-        this._context.workspaceState.update( 'rememberall.expandedNodes', expandedNodes );
+        this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
     }
 
     swap( nodes, firstIndex, secondIndex )
@@ -245,7 +245,7 @@ class RememberallDataProvider
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index - 1 );
-            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this._context.globalState.update( 'remembrall.items', this.itemNodes );
             this.refresh();
         }
     }
@@ -256,7 +256,7 @@ class RememberallDataProvider
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index + 1 );
-            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this._context.globalState.update( 'remembrall.items', this.itemNodes );
             this.refresh();
         }
     }
@@ -270,7 +270,7 @@ class RememberallDataProvider
             var child = located.nodes.splice( located.index, 1 );
             child.parent = parent;
             parent.nodes.push( child[ 0 ] );
-            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this._context.globalState.update( 'remembrall.items', this.itemNodes );
             this.refresh();
         }
     }
@@ -287,10 +287,10 @@ class RememberallDataProvider
             var parentNodes = grandparent ? grandparent.nodes : this.itemNodes;
             var parentIndex = parentNodes.map( function( e ) { return e.uniqueId; } ).indexOf( parent.uniqueId );
             parentNodes.splice( parentIndex + 1, 0, child );
-            this._context.globalState.update( 'rememberall.items', this.itemNodes );
+            this._context.globalState.update( 'remembrall.items', this.itemNodes );
             this.refresh();
         }
     }
 }
 
-exports.RememberallDataProvider = RememberallDataProvider;
+exports.RemembrallDataProvider = RemembrallDataProvider;

@@ -1,11 +1,11 @@
 {
-    "name": "rememberall",
-    "displayName": "Rememberall",
+    "name": "remembrall",
+    "displayName": "Remembrall",
     "description": "A simple extension that provides a todo list",
-    "icon": "resources/rememberall.png",
+    "icon": "resources/remembrall.png",
     "version": "0.0.1",
     "publisher": "Gruntfuggly",
-    "repository": "https://github.com/Gruntfuggly/rememberall",
+    "repository": "https://github.com/Gruntfuggly/remembrall",
     "engines": {
         "vscode": "^1.5.0"
     },
@@ -20,111 +20,111 @@
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "rememberall",
-                    "title": "Rememberall",
-                    "icon": "resources/rememberall-container.svg"
+                    "id": "remembrall",
+                    "title": "Remembrall",
+                    "icon": "resources/remembrall-container.svg"
                 }
             ]
         },
         "views": {
             "explorer": [
                 {
-                    "id": "rememberall-explorer",
-                    "name": "Rememberall",
-                    "when": "rememberall-in-explorer"
+                    "id": "remembrall-explorer",
+                    "name": "Remembrall",
+                    "when": "remembrall-in-explorer"
                 }
             ],
-            "rememberall": [
+            "remembrall": [
                 {
-                    "id": "rememberall",
-                    "name": "Rememberall"
+                    "id": "remembrall",
+                    "name": "Remembrall"
                 }
             ]
         },
         "menus": {
             "view/title": [
                 {
-                    "command": "rememberall.create",
-                    "when": "view =~ /rememberall/",
+                    "command": "remembrall.create",
+                    "when": "view =~ /remembrall/",
                     "group": "navigation@1"
                 },
                 {
-                    "command": "rememberall.refresh",
-                    "when": "view =~ /rememberall/",
+                    "command": "remembrall.refresh",
+                    "when": "view =~ /remembrall/",
                     "group": "navigation@2"
                 },
                 {
-                    "command": "rememberall.expand",
-                    "when": "view =~ /rememberall/ && rememberall-show-expand && rememberall-tree-has-content",
+                    "command": "remembrall.expand",
+                    "when": "view =~ /remembrall/ && remembrall-show-expand && remembrall-tree-has-content",
                     "group": "navigation@3"
                 },
                 {
-                    "command": "rememberall.collapse",
-                    "when": "view =~ /rememberall/ && rememberall-show-collapse && rememberall-tree-has-content",
+                    "command": "remembrall.collapse",
+                    "when": "view =~ /remembrall/ && remembrall-show-collapse && remembrall-tree-has-content",
                     "group": "navigation@3"
                 }
             ],
             "view/item/context": [
                 {
-                    "command": "rememberall.moveUp",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canMoveUp/",
+                    "command": "remembrall.moveUp",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveUp/",
                     "group": "inline@1"
                 },
                 {
-                    "command": "rememberall.moveDown",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canMoveDown/",
+                    "command": "remembrall.moveDown",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveDown/",
                     "group": "inline@2"
                 },
                 {
-                    "command": "rememberall.makeChild",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canParent/",
+                    "command": "remembrall.makeChild",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canParent/",
                     "group": "inline@3"
                 },
                 {
-                    "command": "rememberall.unparent",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canUnparent/",
+                    "command": "remembrall.unparent",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canUnparent/",
                     "group": "inline@4"
                 },
                 {
-                    "command": "rememberall.edit",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canEdit/",
+                    "command": "remembrall.edit",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canEdit/",
                     "group": "inline@5"
                 },
                 {
-                    "command": "rememberall.remove",
-                    "when": "view =~ /rememberall/ && viewItem =~ /canDelete/",
+                    "command": "remembrall.remove",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canDelete/",
                     "group": "inline@6"
                 }
             ]
         },
         "configuration": {
-            "title": "Rememberall",
+            "title": "Remembrall",
             "properties": {
-                "rememberall.debug": {
+                "remembrall.debug": {
                     "type": "boolean",
                     "markdownDescription": "Create a debug channel in the output view",
                     "default": false
                 },
-                "rememberall.showInExplorer": {
+                "remembrall.showInExplorer": {
                     "type": "boolean",
                     "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
                     "default": true
                 },
-                "rememberall.confirmRemove": {
+                "remembrall.confirmRemove": {
                     "type": "boolean",
                     "markdownDescription": "Set to false to disable the remove confirmation prompt",
                     "default": true
                 },
-                "rememberall.syncEnabled": {
+                "remembrall.syncEnabled": {
                     "type": "boolean",
                     "description": "Enable syncing via gist",
                     "default": false
                 },
-                "rememberall.syncToken": {
+                "remembrall.syncToken": {
                     "type": "string",
                     "description": "A github token to allow sync via gist"
                 },
-                "rememberall.syncGistId": {
+                "remembrall.syncGistId": {
                     "type": "string",
                     "description": "A github gist ID used to store shared settings"
                 }
@@ -132,104 +132,104 @@
         },
         "commands": [
             {
-                "command": "rememberall.resetCache",
+                "command": "remembrall.resetCache",
                 "title": "Reset Cache",
-                "category": "Rememberall"
+                "category": "Remembrall"
             },
             {
-                "command": "rememberall.refresh",
+                "command": "remembrall.refresh",
                 "title": "Refresh",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
                 }
             },
             {
-                "command": "rememberall.expand",
+                "command": "remembrall.expand",
                 "title": "Expand all",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/expand.svg",
                     "light": "resources/icons/light/expand.svg"
                 }
             },
             {
-                "command": "rememberall.collapse",
+                "command": "remembrall.collapse",
                 "title": "Collapse all",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/collapse.svg",
                     "light": "resources/icons/light/collapse.svg"
                 }
             },
             {
-                "command": "rememberall.create",
+                "command": "remembrall.create",
                 "title": "Create New Item",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/add.svg",
                     "light": "resources/icons/light/add.svg"
                 }
             },
             {
-                "command": "rememberall.createFromSelection",
+                "command": "remembrall.createFromSelection",
                 "title": "Create New Item From Selection",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/add.svg",
                     "light": "resources/icons/light/add.svg"
                 }
             },
             {
-                "command": "rememberall.edit",
+                "command": "remembrall.edit",
                 "title": "Edit",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/edit.svg",
                     "light": "resources/icons/light/edit.svg"
                 }
             },
             {
-                "command": "rememberall.remove",
+                "command": "remembrall.remove",
                 "title": "Remove",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/trash.svg",
                     "light": "resources/icons/light/trash.svg"
                 }
             },
             {
-                "command": "rememberall.moveUp",
+                "command": "remembrall.moveUp",
                 "title": "Move Up",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/arrow-up.svg",
                     "light": "resources/icons/light/arrow-up.svg"
                 }
             },
             {
-                "command": "rememberall.moveDown",
+                "command": "remembrall.moveDown",
                 "title": "Move Down",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/arrow-down.svg",
                     "light": "resources/icons/light/arrow-down.svg"
                 }
             },
             {
-                "command": "rememberall.makeChild",
+                "command": "remembrall.makeChild",
                 "title": "Make Child of Above Item",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/make-child.svg",
                     "light": "resources/icons/light/make-child.svg"
                 }
             },
             {
-                "command": "rememberall.unparent",
+                "command": "remembrall.unparent",
                 "title": "Unparent",
-                "category": "Rememberall",
+                "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/unparent.svg",
                     "light": "resources/icons/light/unparent.svg"

@@ -9,10 +9,10 @@ function activate( context )
 {
     var outputChannel;
 
-    var rememberallTree = new tree.RememberallDataProvider( context );
+    var remembrallTree = new tree.RemembrallDataProvider( context );
 
-    var rememberallViewExplorer = vscode.window.createTreeView( "rememberall-explorer", { treeDataProvider: rememberallTree } );
-    var rememberallView = vscode.window.createTreeView( "rememberall", { treeDataProvider: rememberallTree } );
+    var remembrallViewExplorer = vscode.window.createTreeView( "remembrall-explorer", { treeDataProvider: remembrallTree } );
+    var remembrallView = vscode.window.createTreeView( "remembrall", { treeDataProvider: remembrallTree } );
 
     function extensionVersion()
     {
@@ -36,25 +36,25 @@ function activate( context )
             outputChannel.dispose();
             outputChannel = undefined;
             storage.setOutputChannel( undefined );
-            rememberallTree.setOutputChannel( undefined );
+            remembrallTree.setOutputChannel( undefined );
         }
-        if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'debug' ) === true )
+        if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'debug' ) === true )
         {
-            outputChannel = vscode.window.createOutputChannel( "Rememberall" );
+            outputChannel = vscode.window.createOutputChannel( "Remembrall" );
             storage.setOutputChannel( outputChannel );
-            rememberallTree.setOutputChannel( outputChannel );
+            remembrallTree.setOutputChannel( outputChannel );
             debug( "Info: Ready" );
         }
     }
 
     function onLocalDataUpdated()
     {
-        rememberallTree.refresh();
+        remembrallTree.refresh();
     }
 
     function refresh()
     {
-        context.globalState.update( 'rememberall.lastSync', undefined );
+        context.globalState.update( 'remembrall.lastSync', undefined );
 
         debug( "Info: Refreshing..." );
 
@@ -64,32 +64,32 @@ function activate( context )
     function setContext()
     {
         var showTree = true;
-        var expanded = context.workspaceState.get( 'rememberall.expanded' );
-        var showInExplorer = vscode.workspace.getConfiguration( 'rememberall' ).get( 'showInExplorer' );
+        var expanded = context.workspaceState.get( 'remembrall.expanded' );
+        var showInExplorer = vscode.workspace.getConfiguration( 'remembrall' ).get( 'showInExplorer' );
 
-        vscode.commands.executeCommand( 'setContext', 'rememberall-show-expand', !expanded );
-        vscode.commands.executeCommand( 'setContext', 'rememberall-show-collapse', expanded );
-        vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', showTree );
-        vscode.commands.executeCommand( 'setContext', 'rememberall-tree-has-content', rememberallTree.hasContent() );
-        vscode.commands.executeCommand( 'setContext', 'rememberall-in-explorer', showInExplorer );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-show-expand', !expanded );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-show-collapse', expanded );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', showTree );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', remembrallTree.hasContent() );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-in-explorer', showInExplorer );
     }
 
     function collapse()
     {
-        context.workspaceState.update( 'rememberall.expanded', false ).then( function()
+        context.workspaceState.update( 'remembrall.expanded', false ).then( function()
         {
-            rememberallTree.clearExpansionState();
-            rememberallTree.refresh();
+            remembrallTree.clearExpansionState();
+            remembrallTree.refresh();
             setContext();
         } );
     }
 
     function expand()
     {
-        context.workspaceState.update( 'rememberall.expanded', true ).then( function()
+        context.workspaceState.update( 'remembrall.expanded', true ).then( function()
         {
-            rememberallTree.clearExpansionState();
-            rememberallTree.refresh();
+            remembrallTree.clearExpansionState();
+            remembrallTree.refresh();
             setContext();
         } );
     }
@@ -97,16 +97,16 @@ function activate( context )
     function selectedNode()
     {
         var result;
-        if( rememberallViewExplorer && rememberallViewExplorer.visible === true )
+        if( remembrallViewExplorer && remembrallViewExplorer.visible === true )
         {
-            rememberallViewExplorer.selection.map( function( node )
+            remembrallViewExplorer.selection.map( function( node )
             {
                 result = node;
             } );
         }
-        if( rememberallView && rememberallView.visible === true )
+        if( remembrallView && remembrallView.visible === true )
         {
-            rememberallView.selection.map( function( node )
+            remembrallView.selection.map( function( node )
             {
                 result = node;
             } );
@@ -116,13 +116,13 @@ function activate( context )
 
     function selectNode( node )
     {
-        if( rememberallViewExplorer && rememberallViewExplorer.visible === true )
+        if( remembrallViewExplorer && remembrallViewExplorer.visible === true )
         {
-            rememberallViewExplorer.reveal( node, { select: true } );
+            remembrallViewExplorer.reveal( node, { select: true } );
         }
-        if( rememberallView && rememberallView.visible === true )
+        if( remembrallView && remembrallView.visible === true )
         {
-            rememberallView.reveal( node, { select: true } );
+            remembrallView.reveal( node, { select: true } );
         }
     }
 
@@ -132,8 +132,8 @@ function activate( context )
         {
             if( item )
             {
-                var node = rememberallTree.add( { label: item }, selectedNode() );
-                rememberallTree.refresh();
+                var node = remembrallTree.add( { label: item }, selectedNode() );
+                remembrallTree.refresh();
                 selectNode( node );
                 storage.triggerBackup( onLocalDataUpdated );
             }
@@ -154,9 +154,9 @@ function activate( context )
                     var document = editor.document;
                     var content = document.getText().substring( document.offsetAt( selection.start ), document.offsetAt( selection.end ) );
 
-                    newNode = rememberallTree.add( { label: content }, currentNode );
+                    newNode = remembrallTree.add( { label: content }, currentNode );
                 }
-                rememberallTree.refresh();
+                remembrallTree.refresh();
                 selectNode( newNode );
                 storage.triggerBackup( onLocalDataUpdated );
             } );
@@ -171,12 +171,12 @@ function activate( context )
         {
             function removeNode()
             {
-                rememberallTree.remove( node );
-                rememberallTree.refresh();
+                remembrallTree.remove( node );
+                remembrallTree.refresh();
                 storage.triggerBackup( onLocalDataUpdated );
             }
 
-            if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'confirmRemove' ) === true )
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true )
             {
                 vscode.window.showInformationMessage( "Are you sure you want to remove this item?", 'Yes', 'No' ).then( function( confirm )
                 {
@@ -209,8 +209,8 @@ function activate( context )
             {
                 if( update )
                 {
-                    rememberallTree.edit( node, update );
-                    rememberallTree.refresh();
+                    remembrallTree.edit( node, update );
+                    remembrallTree.refresh();
                     storage.triggerBackup( onLocalDataUpdated );
                 }
             } );
@@ -227,22 +227,22 @@ function activate( context )
 
         if( node )
         {
-            method.call( rememberallTree, node );
+            method.call( remembrallTree, node );
             storage.triggerBackup( onLocalDataUpdated );
         }
     }
 
-    function moveUp( node ) { nodeFunction( rememberallTree.moveUp, node ); }
-    function moveDown( node ) { nodeFunction( rememberallTree.moveDown, node ); }
-    function makeChild( node ) { nodeFunction( rememberallTree.makeChild, node ); }
-    function unparent( node ) { nodeFunction( rememberallTree.unparent, node ); }
+    function moveUp( node ) { nodeFunction( remembrallTree.moveUp, node ); }
+    function moveDown( node ) { nodeFunction( remembrallTree.moveDown, node ); }
+    function makeChild( node ) { nodeFunction( remembrallTree.makeChild, node ); }
+    function unparent( node ) { nodeFunction( remembrallTree.unparent, node ); }
 
     function resetCache()
     {
-        context.workspaceState.update( 'rememberall.expanded', undefined );
-        context.workspaceState.update( 'rememberall.expandedNodes', undefined );
+        context.workspaceState.update( 'remembrall.expanded', undefined );
+        context.workspaceState.update( 'remembrall.expandedNodes', undefined );
 
-        context.globalState.update( 'rememberall.lastUpdate', undefined );
+        context.globalState.update( 'remembrall.lastUpdate', undefined );
 
         debug( "Info: Cache cleared" );
 
@@ -255,52 +255,52 @@ function activate( context )
 
         storage.initialize( context.globalState, extensionVersion() );
 
-        vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
+        vscode.window.registerTreeDataProvider( 'remembrall', remembrallTree );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.refresh', refresh ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.expand', expand ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.collapse', collapse ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetCache', resetCache ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.create', create ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.createFromSelection', createFromSelection ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.edit', edit ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.remove', remove ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveUp', moveUp ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.moveDown', moveDown ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.makeChild', makeChild ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.unparent', unparent ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'rememberall.resetSync', storage.resetSync ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.refresh', refresh ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.expand', expand ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.collapse', collapse ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetCache', resetCache ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.create', create ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.createFromSelection', createFromSelection ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.edit', edit ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.remove', remove ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveUp', moveUp ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveDown', moveDown ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.makeChild', makeChild ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.unparent', unparent ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetSync', storage.resetSync ) );
 
-        context.subscriptions.push( rememberallViewExplorer.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
-        context.subscriptions.push( rememberallView.onDidExpandElement( function( e ) { rememberallTree.setExpanded( e.element, true ); } ) );
-        context.subscriptions.push( rememberallViewExplorer.onDidCollapseElement( function( e ) { rememberallTree.setExpanded( e.element, false ); } ) );
-        context.subscriptions.push( rememberallView.onDidCollapseElement( function( e ) { rememberallTree.setExpanded( e.element, false ); } ) );
+        context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
+        context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
+        context.subscriptions.push( remembrallViewExplorer.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false ); } ) );
+        context.subscriptions.push( remembrallView.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false ); } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
-            if( e.affectsConfiguration( "rememberall" ) )
+            if( e.affectsConfiguration( "remembrall" ) )
             {
-                if( e.affectsConfiguration( "rememberall.debug" ) )
+                if( e.affectsConfiguration( "remembrall.debug" ) )
                 {
                     resetOutputChannel();
                 }
-                else if( e.affectsConfiguration( 'rememberall.showInExplorer' ) )
+                else if( e.affectsConfiguration( 'remembrall.showInExplorer' ) )
                 {
                     setContext();
                 }
                 else if(
-                    e.affectsConfiguration( 'rememberall.syncEnabled' ) ||
-                    e.affectsConfiguration( 'rememberall.syncGistId' ) )
+                    e.affectsConfiguration( 'remembrall.syncEnabled' ) ||
+                    e.affectsConfiguration( 'remembrall.syncGistId' ) )
                 {
                     storage.initializeSync( extensionVersion, function()
                     {
-                        if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
+                        if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
                         {
                             refresh();
                         }
                     } );
                 }
-                else if( e.affectsConfiguration( 'rememberall.syncToken' ) )
+                else if( e.affectsConfiguration( 'remembrall.syncToken' ) )
                 {
                 }
                 else
