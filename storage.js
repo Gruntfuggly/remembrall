@@ -28,11 +28,27 @@ function compareVersions( a, b )
     return segmentsA.length - segmentsB.length;
 }
 
+function logFish( location, value )
+{
+    debug( "current:" + state.get( 'fish' ) );
+
+    state.update( 'fish', value );
+    var storedValue = state.get( 'fish' );
+    debug( location + ":" + storedValue );
+}
+
 function initialize( globalState, currentVersion )
 {
     state = globalState;
 
+    logFish( "initialize", 1 );
     initializeSync( currentVersion );
+    var storedDate = globalState.get( 'rememberall.lastBackup' );
+    debug( "storedDate:" + storedDate );
+    if( storedDate )
+    {
+        lastBackup = new Date( storedDate );
+    }
 }
 
 function setOutputChannel( outputChannel )
@@ -72,6 +88,8 @@ function cleanNodes( nodes )
 
 function initializeSync( currentVersion, callback )
 {
+    logFish( "initializeSync", 100 );
+
     version = currentVersion;
 
     var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
@@ -141,15 +159,20 @@ function processQueue()
 
 function sync( callback )
 {
+    logFish( "sync", 200 );
+
     function doSync( callback )
     {
+        logFish( "sync", 250 );
+        debug( ">>> doSync" );
         if( gistore.token )
         {
+            debug( "[sync: gistore.sync]" );
             gistore.sync().then( function( data )
             {
                 function doUpdate()
                 {
-                    debug( "Sync at " + now.toISOString() );
+                    debug( "Updating local tree at " + now.toISOString() );
 
                     state.update( 'rememberall.items', data.rememberallSync.items );
                     state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
@@ -159,18 +182,18 @@ function sync( callback )
 
                 debug( "Checking local data against backup..." );
 
-                debug( "local:" + new Date( state.get( 'rememberall.lastSync' ) ) );
-                debug( "remote:" + new Date( data.rememberallSync.lastSync ) );
+                debug( " local timestamp:" + new Date( state.get( 'rememberall.lastSync' ) ) );
+                debug( " remote timestamp:" + new Date( data.rememberallSync.lastSync ) );
                 if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > new Date( state.get( 'rememberall.lastSync' ) ) )
                 {
                     debug( "Checking version..." );
                     var storedVersion = state.get( 'rememberall.version' );
                     if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                     {
-                        debug( "Checking time..." );
-                        debug( "last backup:" + lastBackup );
+                        debug( " last backup:" + lastBackup );
                         if( new Date( data.rememberallSync.lastSync ) < lastBackup )
                         {
+                            debug( "local data newer than backup!" );
                             vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                             {
                                 if( confirm === 'Overwrite' )
@@ -235,9 +258,10 @@ function sync( callback )
 
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
-        queue.push( enqueue( doSync, this, [ callback ] ) );
+        // queue.push( enqueue( doSync, this, [ callback ] ) );
 
-        processQueue();
+        // processQueue();
+        doSync( callback );
     }
     else
     {
@@ -256,10 +280,13 @@ function setActive( isActive )
 
 function backup()
 {
+    logFish( "backup", 300 );
+
     function doBackup()
     {
         if( gistore.token )
         {
+            debug( "[backup: gistore.sync]" );
             gistore.sync().then( function( data )
             {
                 var storedVersion = state.get( 'rememberall.version' );
@@ -267,7 +294,7 @@ function backup()
                 {
                     var cleanedNodes = cleanNodes( state.get( 'rememberall.items' ) || [] );
 
-                    if( data.rememberallSync.items !== cleanedNodes )
+                    if( JSON.stringify( data.rememberallSync.items ) !== JSON.stringify( cleanedNodes ) )
                     {
                         debug( "Content changed..." );
 
@@ -310,6 +337,7 @@ function backup()
                         {
                             debug( "Starting backup at " + now.toISOString() );
 
+                            debug( "[backup: gistore.backUp]" );
                             gistore.backUp( {
                                 rememberallSync: {
                                     items: cleanedNodes,
@@ -368,14 +396,21 @@ function backup()
 
 function triggerBackup()
 {
+    logFish( "triggerBackup", 400 );
+
     lastBackup = new Date();
 
-    debug( "set lastBackup: " + lastBackup );
+    debug( "Set time of last backup: " + lastBackup );
+
+    state.update( 'rememberall.lastBackup', lastBackup );
+    var storedDate = state.get( 'rememberall.lastBackup' );
+    debug( "storedDate:" + storedDate );
+
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
         debug( "Backing up in 1 second..." );
         clearTimeout( backupTimer );
-        backupTimer = setTimeout( backup, 1000 );
+        backupTimer = setTimeout( backup, 1000, this );
     }
 }
 
@@ -384,6 +419,7 @@ function resetSync()
     if( gistore.token )
     {
         var now = new Date();
+        debug( "[Reset: gistore.backUp]" );
         gistore.backUp( {
             rememberallSync: {
                 items: [],

@@ -56,6 +56,8 @@ function activate( context )
 
         context.globalState.update( 'rememberall.lastSync', undefined );
 
+        debug( "Refreshing..." );
+
         storage.sync( onSync );
     }
 
@@ -240,6 +242,8 @@ function activate( context )
         context.workspaceState.update( 'rememberall.expanded', undefined );
         context.workspaceState.update( 'rememberall.expandedNodes', undefined );
 
+        context.globalState.update( 'rememberall.lastBackup', undefined );
+
         debug( "Cache cleared" );
 
         refresh();
@@ -247,6 +251,8 @@ function activate( context )
 
     function register()
     {
+        resetOutputChannel();
+
         storage.initialize( context.globalState, extensionVersion() );
 
         vscode.window.registerTreeDataProvider( 'rememberall', rememberallTree );
@@ -315,7 +321,6 @@ function activate( context )
 
         context.subscriptions.push( outputChannel );
 
-        resetOutputChannel();
         setContext();
         storage.setActive( true );
         refresh();
