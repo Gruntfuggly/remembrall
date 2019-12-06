@@ -42,7 +42,7 @@ A github gist ID used to store shared settings.
 
 Most interaction is done with the buttons in the tree view, but one extra command is available which doesn't have a button:
 
-**remembrall.createFromSelection** will create a new item in the tree for anything you have selected (or multiple items if you have multiple selections).
+**remembrall.createFromSelection** will create a new item in the tree from any text you have selected in the current editor (or multiple items if you have multiple selections).
 
 ## Installing
 
