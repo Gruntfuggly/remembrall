@@ -4,7 +4,7 @@ var gistore = require( 'gistore' );
 var generalOutputChannel;
 var active = false;
 var state;
-var lastBackup = new Date();
+var lastUpdate = new Date();
 var backupTimer;
 var queue = [];
 var version;
@@ -28,26 +28,16 @@ function compareVersions( a, b )
     return segmentsA.length - segmentsB.length;
 }
 
-function logFish( location, value )
-{
-    debug( "current:" + state.get( 'fish' ) );
-
-    state.update( 'fish', value );
-    var storedValue = state.get( 'fish' );
-    debug( location + ":" + storedValue );
-}
-
 function initialize( globalState, currentVersion )
 {
     state = globalState;
 
-    logFish( "initialize", 1 );
     initializeSync( currentVersion );
-    var storedDate = globalState.get( 'rememberall.lastBackup' );
+    var storedDate = globalState.get( 'rememberall.lastUpdate' );
     if( storedDate )
     {
-        debug( "Last backup: " + lastBackup );
-        lastBackup = new Date( storedDate );
+        debug( "Info: Last backup: " + lastUpdate );
+        lastUpdate = new Date( storedDate );
     }
 }
 
@@ -88,8 +78,6 @@ function cleanNodes( nodes )
 
 function initializeSync( currentVersion, callback )
 {
-    logFish( "initializeSync", 100 );
-
     version = currentVersion;
 
     var enabled = vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled', undefined );
@@ -102,7 +90,7 @@ function initializeSync( currentVersion, callback )
 
         if( gistId )
         {
-            debug( "Reading from gist " + gistId );
+            debug( "Info: Reading from gist " + gistId );
 
             gistore.setId( gistId );
 
@@ -113,7 +101,7 @@ function initializeSync( currentVersion, callback )
         }
         else
         {
-            debug( "Creating new gist..." );
+            debug( "Info: Creating new gist..." );
 
             gistore.createBackUp( 'rememberallSync',
                 {
@@ -125,7 +113,7 @@ function initializeSync( currentVersion, callback )
                 } )
                 .then( function( id )
                 {
-                    debug( "New gist " + id );
+                    debug( "Info: New gist " + id );
                     vscode.workspace.getConfiguration( 'rememberall' ).update( 'syncGistId', id, true );
 
                     if( callback )
@@ -157,75 +145,71 @@ function processQueue()
     }
 }
 
+function doUpdate( data, callback )
+{
+    debug( "Info: Updating local data" );
+
+    state.update( 'rememberall.items', data.rememberallSync.items );
+    state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
+
+    if( callback )
+    {
+        callback();
+    }
+}
+
 function sync( callback )
 {
-    logFish( "sync", 200 );
-
     function doSync( callback )
     {
-        logFish( "sync", 250 );
-        debug( ">>> doSync" );
+        debug( "Debug: doSync" );
         if( gistore.token )
         {
-            debug( "[sync: gistore.sync]" );
             gistore.sync().then( function( data )
             {
-                function doUpdate()
-                {
-                    debug( "Updating local tree at " + now.toISOString() );
-
-                    state.update( 'rememberall.items', data.rememberallSync.items );
-                    state.update( 'rememberall.lastSync', data.rememberallSync.lastSync );
-
-                    if( callback )
-                    {
-                        debug( "Callback..." );
-                        callback();
-                    }
-                }
-
                 var cleanedNodes = cleanNodes( state.get( 'rememberall.items' ) || [] );
 
                 if( JSON.stringify( data.rememberallSync.items ) !== JSON.stringify( cleanedNodes ) )
                 {
-                    var now = new Date();
-
-                    debug( "Checking local data against backup..." );
-
+                    debug( "Info: Checking local data against backup..." );
                     debug( " local timestamp:" + new Date( state.get( 'rememberall.lastSync' ) ) );
                     debug( " remote timestamp:" + new Date( data.rememberallSync.lastSync ) );
+
                     if( state.get( 'rememberall.lastSync' ) === undefined || data.rememberallSync.lastSync > new Date( state.get( 'rememberall.lastSync' ) ) )
                     {
-                        debug( "Checking version..." );
                         var storedVersion = state.get( 'rememberall.version' );
                         if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                         {
-                            debug( " last backup:" + lastBackup );
-                            if( new Date( data.rememberallSync.lastSync ) < lastBackup )
+                            debug( " last backup:" + lastUpdate );
+                            if( new Date( data.rememberallSync.lastSync ) < lastUpdate )
                             {
-                                debug( "local data newer than backup!" );
+                                debug( "Query: local tree is newer than the backup" );
                                 vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                                 {
                                     if( confirm === 'Overwrite' )
                                     {
-                                        debug( "Overwrite" );
-                                        doUpdate();
+                                        debug( "Response: Overwrite local data" );
+                                        doUpdate( data, callback );
                                     }
                                     else if( confirm === 'Keep Local' )
                                     {
-                                        debug( "Keep Local" );
-                                        triggerBackup();
+                                        debug( "Response: Keep local data" );
+                                        triggerBackup( callback );
+                                    }
+                                    else 
+                                    {
+                                        debug( "Response: Cancelled" );
                                     }
                                 } );
                             }
                             else
                             {
-                                doUpdate();
+                                doUpdate( data, callback );
                             }
                         }
                         else
                         {
-                            debug( "Ignoring synced state from older version" );
+                            debug( "Warning: Ignoring synced state from older version" );
                             if( callback )
                             {
                                 callback();
@@ -234,7 +218,7 @@ function sync( callback )
                     }
                     else
                     {
-                        debug( "Ignoring remote data" );
+                        debug( "Warning: Ignoring out of date remote data" );
                         if( callback )
                         {
                             callback();
@@ -243,7 +227,7 @@ function sync( callback )
                 }
                 else
                 {
-                    debug( "Ignoring unchanged data" );
+                    debug( "Info: Ignoring unchanged data" );
                     if( callback )
                     {
                         callback();
@@ -255,7 +239,7 @@ function sync( callback )
             {
                 if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken' ) )
                 {
-                    debug( "sync failed:" + error );
+                    debug( "Error: sync failed:" + error );
                 }
 
                 if( callback )
@@ -268,7 +252,7 @@ function sync( callback )
         }
         else
         {
-            debug( "No sync token defined" );
+            debug( "Info: No sync token defined" );
 
             if( callback )
             {
@@ -280,10 +264,11 @@ function sync( callback )
 
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
+        debug( "Debug: sync" );
+
         queue.push( enqueue( doSync, this, [ callback ] ) );
 
         processQueue();
-        doSync( callback );
     }
     else
     {
@@ -293,22 +278,21 @@ function sync( callback )
 
 function setActive( isActive )
 {
-    if( isActive === false )
+    active = isActive;
+
+    if( active === true && vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
         backup();
     }
-    active = isActive;
 }
 
-function backup()
+function backup( callback )
 {
-    logFish( "backup", 300 );
-
     function doBackup()
     {
+        debug( "Debug: doBackup" );
         if( gistore.token )
         {
-            debug( "[backup: gistore.sync]" );
             gistore.sync().then( function( data )
             {
                 var storedVersion = state.get( 'rememberall.version' );
@@ -318,19 +302,19 @@ function backup()
 
                     if( JSON.stringify( data.rememberallSync.items ) !== JSON.stringify( cleanedNodes ) )
                     {
-                        debug( "Content changed..." );
-
                         var now = new Date();
 
-                        if( data.rememberallSync.lastSync < lastBackup )
+                        if( data.rememberallSync.lastSync < lastUpdate )
                         {
-                            debug( "local data newer than backup?" );
-
                             vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Replace Backup', 'Overwrite Local' ).then( function( confirm )
                             {
+                                debug( "Query: local tree is newer than the backup" );
+
                                 if( confirm === 'Replace Backup' )
                                 {
-                                    debug( "Replacing backup with local data" );
+                                    debug( "Response: Replacing backup with local data..." );
+
+                                    now = new Date();
 
                                     gistore.backUp( {
                                         rememberallSync: {
@@ -340,18 +324,23 @@ function backup()
                                         }
                                     } ).then( function()
                                     {
-                                        debug( "Backup at " + now.toISOString() );
+                                        debug( "Info: Backup complete at " + now.toISOString() );
                                         processQueue();
                                     } ).catch( function( error )
                                     {
-                                        console.error( "backup failed: " + error );
+                                        console.error( "Error: Backup failed: " + error );
                                         triggerBackup();
                                         processQueue();
                                     } );
                                 }
+                                else if( confirm === 'Overwrite Local' )
+                                {
+                                    debug( "Response: Overwrite local data with backup" );
+                                    doUpdate( data, callback );
+                                }
                                 else
                                 {
-                                    debug( "Cancelled" );
+                                    debug( "Response: Cancelled" );
                                 }
                             } );
                         }
@@ -359,7 +348,6 @@ function backup()
                         {
                             debug( "Starting backup at " + now.toISOString() );
 
-                            debug( "[backup: gistore.backUp]" );
                             gistore.backUp( {
                                 rememberallSync: {
                                     items: cleanedNodes,
@@ -368,11 +356,11 @@ function backup()
                                 }
                             } ).then( function()
                             {
-                                debug( "Backup at " + now.toISOString() );
+                                debug( "Info: Backup complete at " + now.toISOString() );
                                 processQueue();
                             } ).catch( function( error )
                             {
-                                console.error( "backup failed: " + error );
+                                console.error( "Error: backup failed: " + error );
                                 triggerBackup();
                                 processQueue();
                             } );
@@ -380,19 +368,19 @@ function backup()
                     }
                     else
                     {
-                        debug( "Ignoring unchanged data" );
+                        debug( "Info: Ignoring unchanged data" );
                         processQueue();
                     }
                 }
                 else
                 {
-                    debug( "Ignoring synced state from older version" );
+                    debug( "Warning: Ignoring synced state from older version" );
                 }
             } ).catch( function( error )
             {
                 if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncToken' ) )
                 {
-                    debug( "sync failed:" + error );
+                    debug( "Error: sync failed:" + error );
                 }
 
                 processQueue();
@@ -404,35 +392,33 @@ function backup()
         }
     }
 
-    if( active )
+    if( active === true && vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
+        debug( "Debug: backup" );
+
         queue.push( enqueue( doBackup, this, [] ) );
 
         processQueue();
     }
     else
     {
-        debug( "Not active" );
+        debug( "Info: Not active" );
     }
 }
 
-function triggerBackup()
+function triggerBackup( callback )
 {
-    logFish( "triggerBackup", 400 );
+    debug( "Debug: triggerBackup" );
 
-    lastBackup = new Date();
-
-    debug( "Set time of last backup: " + lastBackup );
-
-    state.update( 'rememberall.lastBackup', lastBackup );
-    var storedDate = state.get( 'rememberall.lastBackup' );
-    debug( "storedDate:" + storedDate );
+    lastUpdate = new Date();
+    state.update( 'rememberall.lastUpdate', lastUpdate );
 
     if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'syncEnabled' ) === true )
     {
-        debug( "Backing up in 1 second..." );
+        debug( "Info: Set time of last update: " + lastUpdate );
+        debug( "Info: Backing up in 1 second..." );
         clearTimeout( backupTimer );
-        backupTimer = setTimeout( backup, 1000, this );
+        backupTimer = setTimeout( backup, 1000, this, callback );
     }
 }
 
@@ -441,7 +427,6 @@ function resetSync()
     if( gistore.token )
     {
         var now = new Date();
-        debug( "[Reset: gistore.backUp]" );
         gistore.backUp( {
             rememberallSync: {
                 items: [],
@@ -450,11 +435,11 @@ function resetSync()
             }
         } ).then( function()
         {
-            debug( "Reset sync at " + now.toISOString() );
+            debug( "Info: Reset sync at " + now.toISOString() );
             sync();
         } ).catch( function( error )
         {
-            debug( "Reset failed: " + error );
+            debug( "Error: Reset failed: " + error );
         } );
     }
 }

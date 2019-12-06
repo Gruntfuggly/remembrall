@@ -43,22 +43,22 @@ function activate( context )
             outputChannel = vscode.window.createOutputChannel( "Rememberall" );
             storage.setOutputChannel( outputChannel );
             rememberallTree.setOutputChannel( outputChannel );
-            debug( "Ready" );
+            debug( "Info: Ready" );
         }
+    }
+
+    function onLocalDataUpdated()
+    {
+        rememberallTree.refresh();
     }
 
     function refresh()
     {
-        function onSync()
-        {
-            rememberallTree.refresh();
-        }
-
         context.globalState.update( 'rememberall.lastSync', undefined );
 
-        debug( "Refreshing..." );
+        debug( "Info: Refreshing..." );
 
-        storage.sync( onSync );
+        storage.sync( onLocalDataUpdated );
     }
 
     function setContext()
@@ -135,7 +135,7 @@ function activate( context )
                 var node = rememberallTree.add( { label: item }, selectedNode() );
                 rememberallTree.refresh();
                 selectNode( node );
-                storage.triggerBackup();
+                storage.triggerBackup( onLocalDataUpdated );
             }
         } );
     }
@@ -158,7 +158,7 @@ function activate( context )
                 }
                 rememberallTree.refresh();
                 selectNode( newNode );
-                storage.triggerBackup();
+                storage.triggerBackup( onLocalDataUpdated );
             } );
         }
     }
@@ -173,7 +173,7 @@ function activate( context )
             {
                 rememberallTree.remove( node );
                 rememberallTree.refresh();
-                storage.triggerBackup();
+                storage.triggerBackup( onLocalDataUpdated );
             }
 
             if( vscode.workspace.getConfiguration( 'rememberall' ).get( 'confirmRemove' ) === true )
@@ -211,7 +211,7 @@ function activate( context )
                 {
                     rememberallTree.edit( node, update );
                     rememberallTree.refresh();
-                    storage.triggerBackup();
+                    storage.triggerBackup( onLocalDataUpdated );
                 }
             } );
         }
@@ -228,7 +228,7 @@ function activate( context )
         if( node )
         {
             method.call( rememberallTree, node );
-            storage.triggerBackup();
+            storage.triggerBackup( onLocalDataUpdated );
         }
     }
 
@@ -242,9 +242,9 @@ function activate( context )
         context.workspaceState.update( 'rememberall.expanded', undefined );
         context.workspaceState.update( 'rememberall.expandedNodes', undefined );
 
-        context.globalState.update( 'rememberall.lastBackup', undefined );
+        context.globalState.update( 'rememberall.lastUpdate', undefined );
 
-        debug( "Cache cleared" );
+        debug( "Info: Cache cleared" );
 
         refresh();
     }
@@ -305,7 +305,7 @@ function activate( context )
                 }
                 else
                 {
-                    debug( "Unexpected setting changed" );
+                    debug( "Error: Unexpected setting changed" );
                 }
             }
         } ) );
