@@ -169,49 +169,68 @@ function sync( callback )
         {
             gistore.sync().then( function( data )
             {
-                var cleanedNodes = cleanNodes( state.get( 'remembrall.items' ) || [] );
-
-                if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
+                if( data.remembrallSync === undefined )
                 {
-                    debug( "Info: Checking local data against backup..." );
-                    debug( " local timestamp:" + new Date( state.get( 'remembrall.lastSync' ) ) );
-                    debug( " remote timestamp:" + new Date( data.remembrallSync.lastSync ) );
-
-                    if( state.get( 'remembrall.lastSync' ) === undefined || data.remembrallSync.lastSync > new Date( state.get( 'remembrall.lastSync' ) ) )
+                    debug( "Warning: No existing backup" );
+                    if( callback )
                     {
-                        var storedVersion = state.get( 'remembrall.version' );
-                        if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
+                        callback()
+                    }
+                }
+                else
+                {
+                    var cleanedNodes = cleanNodes( state.get( 'remembrall.items' ) || [] );
+
+                    if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
+                    {
+                        debug( "Info: Checking local data against backup..." );
+                        debug( " local timestamp:" + new Date( state.get( 'remembrall.lastSync' ) ) );
+                        debug( " remote timestamp:" + new Date( data.remembrallSync.lastSync ) );
+
+                        if( state.get( 'remembrall.lastSync' ) === undefined || data.remembrallSync.lastSync > new Date( state.get( 'remembrall.lastSync' ) ) )
                         {
-                            debug( " last backup:" + lastUpdate );
-                            if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
+                            var storedVersion = state.get( 'remembrall.version' );
+                            if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
                             {
-                                debug( "Query: local tree is newer than the backup" );
-                                vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                                debug( " last backup:" + lastUpdate );
+                                if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
                                 {
-                                    if( confirm === 'Overwrite' )
+                                    debug( "Query: local tree is newer than the backup" );
+                                    vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                                     {
-                                        debug( "Response: Overwrite local data" );
-                                        doUpdate( data, callback );
-                                    }
-                                    else if( confirm === 'Keep Local' )
-                                    {
-                                        debug( "Response: Keep local data" );
-                                        triggerBackup( callback );
-                                    }
-                                    else 
-                                    {
-                                        debug( "Response: Cancelled" );
-                                    }
-                                } );
+                                        if( confirm === 'Overwrite' )
+                                        {
+                                            debug( "Response: Overwrite local data" );
+                                            doUpdate( data, callback );
+                                        }
+                                        else if( confirm === 'Keep Local' )
+                                        {
+                                            debug( "Response: Keep local data" );
+                                            triggerBackup( callback );
+                                        }
+                                        else 
+                                        {
+                                            debug( "Response: Cancelled" );
+                                        }
+                                    } );
+                                }
+                                else
+                                {
+                                    doUpdate( data, callback );
+                                }
                             }
                             else
                             {
-                                doUpdate( data, callback );
+                                debug( "Warning: Ignoring synced state from older version" );
+                                if( callback )
+                                {
+                                    callback();
+                                }
                             }
                         }
                         else
                         {
-                            debug( "Warning: Ignoring synced state from older version" );
+                            debug( "Warning: Ignoring out of date remote data" );
                             if( callback )
                             {
                                 callback();
@@ -220,19 +239,11 @@ function sync( callback )
                     }
                     else
                     {
-                        debug( "Warning: Ignoring out of date remote data" );
+                        debug( "Info: Ignoring unchanged data" );
                         if( callback )
                         {
                             callback();
                         }
-                    }
-                }
-                else
-                {
-                    debug( "Info: Ignoring unchanged data" );
-                    if( callback )
-                    {
-                        callback();
                     }
                 }
 
@@ -241,7 +252,7 @@ function sync( callback )
             {
                 if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
                 {
-                    debug( "Error: sync failed:" + error );
+                    debug( "Error: sync failed: " + error );
                 }
 
                 if( callback )
@@ -384,7 +395,7 @@ function backup( callback )
             {
                 if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
                 {
-                    debug( "Error: sync failed:" + error );
+                    debug( "Error: sync failed: " + error );
                 }
 
                 processQueue();
