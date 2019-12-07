@@ -234,6 +234,16 @@
                     "dark": "resources/icons/dark/unparent.svg",
                     "light": "resources/icons/light/unparent.svg"
                 }
+            },
+            {
+                "command": "remembrall.import",
+                "title": "Import",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.export",
+                "title": "Export",
+                "category": "Remembrall"
             }
         ]
     },

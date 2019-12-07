@@ -1,6 +1,7 @@
 var vscode = require( 'vscode' );
 var gistore = require( 'gistore' );
 var os = require( 'os' );
+var utils = require( './utils' );
 
 var generalOutputChannel;
 var active = false;
@@ -9,25 +10,6 @@ var lastUpdate = new Date();
 var backupTimer;
 var queue = [];
 var version;
-
-function compareVersions( a, b )
-{
-    var i, diff;
-    var regExStrip0 = /(\.0+)+$/;
-    var segmentsA = a.replace( regExStrip0, '' ).split( '.' );
-    var segmentsB = b.replace( regExStrip0, '' ).split( '.' );
-    var l = Math.min( segmentsA.length, segmentsB.length );
-
-    for( i = 0; i < l; i++ )
-    {
-        diff = parseInt( segmentsA[ i ], 10 ) - parseInt( segmentsB[ i ], 10 );
-        if( diff )
-        {
-            return diff;
-        }
-    }
-    return segmentsA.length - segmentsB.length;
-}
 
 function initialize( globalState, currentVersion )
 {
@@ -59,22 +41,18 @@ function debug( text )
     }
 }
 
-function cleanNodes( nodes )
+function fetchNodes()
 {
-    return nodes.map( function( node )
+    var nodeData = state.get( 'remembrall.items' );
+    try
     {
-        var cleaned = {
-            label: node.label,
-            icon: node.icon,
-            uniqueId: node.uniqueId,
-            nodes: [],
-        };
-        if( node.nodes && node.nodes.length > 0 )
-        {
-            cleaned.nodes = cleanNodes( node.nodes );
-        }
-        return cleaned;
-    } );
+        var nodes = JSON.parse( nodeData );
+        return nodes;
+    }
+    catch( e )
+    {
+        return [];
+    }
 }
 
 function initializeSync( currentVersion, callback )
@@ -107,7 +85,7 @@ function initializeSync( currentVersion, callback )
             gistore.createBackUp( 'remembrallSync',
                 {
                     remembrallSync: {
-                        items: cleanNodes( state.get( 'remembrall.items' ) || [] ),
+                        items: utils.cleanNodes( fetchNodes() ),
                         version: version,
                         lastSync: new Date(),
                         by: os.hostname()
@@ -151,8 +129,7 @@ function doUpdate( data, callback )
 {
     debug( "Info: Updating local data" );
 
-    state.update( 'remembrall.items', data.remembrallSync.items );
-    state.update( 'remembrall.lastSync', data.remembrallSync.lastSync );
+    state.update( 'remembrall.items', JSON.stringify( data.remembrallSync.items ) );
 
     if( callback )
     {
@@ -174,12 +151,12 @@ function sync( callback )
                     debug( "Warning: No existing backup" );
                     if( callback )
                     {
-                        callback()
+                        callback();
                     }
                 }
                 else
                 {
-                    var cleanedNodes = cleanNodes( state.get( 'remembrall.items' ) || [] );
+                    var cleanedNodes = utils.cleanNodes( fetchNodes() );
 
                     if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
                     {
@@ -187,12 +164,12 @@ function sync( callback )
                         debug( " local timestamp:" + new Date( state.get( 'remembrall.lastSync' ) ) );
                         debug( " remote timestamp:" + new Date( data.remembrallSync.lastSync ) );
 
-                        if( state.get( 'remembrall.lastSync' ) === undefined || data.remembrallSync.lastSync > new Date( state.get( 'remembrall.lastSync' ) ) )
+                        if( state.get( 'remembrall.lastSync' ) === undefined || new Date( data.remembrallSync.lastSync ) > new Date( state.get( 'remembrall.lastSync' ) ) )
                         {
                             var storedVersion = state.get( 'remembrall.version' );
-                            if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
+                            if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
                             {
-                                debug( " last backup:" + lastUpdate );
+                                debug( " last update:" + lastUpdate );
                                 if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
                                 {
                                     debug( "Query: local tree is newer than the backup" );
@@ -208,7 +185,7 @@ function sync( callback )
                                             debug( "Response: Keep local data" );
                                             triggerBackup( callback );
                                         }
-                                        else 
+                                        else
                                         {
                                             debug( "Response: Cancelled" );
                                         }
@@ -292,11 +269,6 @@ function sync( callback )
 function setActive( isActive )
 {
     active = isActive;
-
-    if( active === true && vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
-    {
-        backup();
-    }
 }
 
 function backup( callback )
@@ -309,9 +281,9 @@ function backup( callback )
             gistore.sync().then( function( data )
             {
                 var storedVersion = state.get( 'remembrall.version' );
-                if( storedVersion === undefined || compareVersions( version, storedVersion ) >= 0 )
+                if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
                 {
-                    var cleanedNodes = cleanNodes( state.get( 'remembrall.items' ) || [] );
+                    var cleanedNodes = utils.cleanNodes( fetchNodes() );
 
                     if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
                     {
@@ -339,6 +311,7 @@ function backup( callback )
                                     } ).then( function()
                                     {
                                         debug( "Info: Backup complete at " + now.toISOString() );
+                                        state.update( 'remembrall.lastSync', now );
                                         processQueue();
                                     } ).catch( function( error )
                                     {
@@ -372,6 +345,7 @@ function backup( callback )
                             } ).then( function()
                             {
                                 debug( "Info: Backup complete at " + now.toISOString() );
+                                state.update( 'remembrall.lastSync', now );
                                 processQueue();
                             } ).catch( function( error )
                             {

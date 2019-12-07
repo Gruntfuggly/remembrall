@@ -2,6 +2,7 @@
 var vscode = require( 'vscode' );
 var fs = require( 'fs' );
 var path = require( 'path' );
+var os = require( 'os' );
 var tree = require( './tree' );
 var storage = require( './storage' );
 
@@ -54,8 +55,6 @@ function activate( context )
 
     function refresh()
     {
-        context.globalState.update( 'remembrall.lastSync', undefined );
-
         debug( "Info: Refreshing..." );
 
         storage.sync( onLocalDataUpdated );
@@ -178,7 +177,12 @@ function activate( context )
 
             if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true )
             {
-                vscode.window.showInformationMessage( "Are you sure you want to remove this item?", 'Yes', 'No' ).then( function( confirm )
+                var prompt = "Are you sure you want to remove this item";
+                if( node.nodes.length > 0 )
+                {
+                    prompt += ", and all it's children";
+                }
+                vscode.window.showInformationMessage( prompt + "?", 'Yes', 'No' ).then( function( confirm )
                 {
                     if( confirm === 'Yes' )
                     {
@@ -243,10 +247,73 @@ function activate( context )
         context.workspaceState.update( 'remembrall.expandedNodes', undefined );
 
         context.globalState.update( 'remembrall.lastUpdate', undefined );
+        context.globalState.update( 'remembrall.lastSync', undefined );
+        context.globalState.update( 'remembrall.items', undefined );
 
         debug( "Info: Cache cleared" );
 
         refresh();
+    }
+
+    function exportTree()
+    {
+        var exported = JSON.stringify( JSON.parse( context.globalState.get( 'remembrall.items' ) ), null, 2 );
+        var newFile = vscode.Uri.parse( 'untitled:' + path.join( os.homedir(), 'remembrall.json' ) );
+        vscode.workspace.openTextDocument( newFile ).then( function( document )
+        {
+            var edit = new vscode.WorkspaceEdit();
+            edit.delete( newFile, new vscode.Range(
+                document.positionAt( 0 ),
+                document.positionAt( document.getText().length - 1 )
+            ) );
+            return vscode.workspace.applyEdit( edit ).then( function( success )
+            {
+                var edit = new vscode.WorkspaceEdit();
+                edit.insert( newFile, new vscode.Position( 0, 0 ), exported );
+                return vscode.workspace.applyEdit( edit ).then( function( success )
+                {
+                    if( success )
+                    {
+                        vscode.window.showTextDocument( document );
+                    }
+                } );
+            } );
+        } );
+    }
+
+    function importTree()
+    {
+        if( vscode.window.activeTextEditor )
+        {
+            if( vscode.window.activeTextEditor.document )
+            {
+                try
+                {
+                    var nodeData = JSON.parse( vscode.window.activeTextEditor.document.getText() );
+                    vscode.window.showInformationMessage( "Are you sure you want import this data?", 'Yes', 'No' ).then( function( confirm )
+                    {
+                        if( confirm === 'Yes' )
+                        {
+                            if( Array.isArray( nodeData ) )
+                            {
+                                context.globalState.update( 'remembrall.items', JSON.stringify( nodeData ) );
+                                onLocalDataUpdated();
+                            }
+                            else
+                            {
+                                debug( "Error: Data is not valid" );
+                                vscode.window.showErrorMessage( "Remembrall: Data is not valid" );
+                            }
+                        }
+                    } );
+                }
+                catch( e )
+                {
+                    debug( "Error: Failed to get data from current document." );
+                    vscode.window.showErrorMessage( "Remembrall: Failed to get data from current document" );
+                }
+            }
+        }
     }
 
     function register()
@@ -270,6 +337,8 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.makeChild', makeChild ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.unparent', unparent ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetSync', storage.resetSync ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.export', exportTree ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.import', importTree ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
@@ -315,7 +384,7 @@ function activate( context )
             storage.setActive( e.focused );
             if( e.focused )
             {
-                refresh();
+                remembrallTree.refresh();
             }
         } ) );
 

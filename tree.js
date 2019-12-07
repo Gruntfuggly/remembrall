@@ -1,17 +1,9 @@
 var vscode = require( 'vscode' );
 var path = require( 'path' );
+var utils = require( './utils' );
 
 var expandedNodes = {};
 var nodeCounter = 1;
-
-function uuidv4()
-{
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace( /[xy]/g, function( c )
-    {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : ( r & 0x3 | 0x8 );
-        return v.toString( 16 );
-    } );
-}
 
 class RemembrallDataProvider
 {
@@ -24,7 +16,26 @@ class RemembrallDataProvider
 
         expandedNodes = _context.workspaceState.get( 'remembrall.expandedNodes', {} );
 
-        this.itemNodes = this._context.globalState.get( 'remembrall.items' ) || [];
+        this.fetchNodes();
+    }
+
+    fetchNodes()
+    {
+        try
+        {
+            var nodeData = this._context.globalState.get( 'remembrall.items' );
+            this.itemNodes = JSON.parse( nodeData );
+        }
+        catch( e )
+        {
+            this.itemNodes = [];
+        }
+    }
+
+    storeNodes()
+    {
+        var nodeData = JSON.stringify( utils.cleanNodes( this.itemNodes ) );
+        this._context.globalState.update( 'remembrall.items', nodeData );
     }
 
     setOutputChannel( outputChannel )
@@ -124,7 +135,7 @@ class RemembrallDataProvider
     {
         var itemNode = {
             id: nodeCounter++,
-            uniqueId: uuidv4(),
+            uniqueId: utils.uuidv4(),
             label: item.label,
             icon: 'remembrall',
             nodes: []
@@ -142,7 +153,7 @@ class RemembrallDataProvider
 
         this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'remembrall.items', this.itemNodes );
+        this.storeNodes();
 
         return itemNode;
     }
@@ -150,7 +161,7 @@ class RemembrallDataProvider
     edit( item, update )
     {
         item.label = update;
-        this._context.globalState.update( 'remembrall.items', this.itemNodes );
+        this.storeNodes();
     }
 
     remove( node )
@@ -160,7 +171,7 @@ class RemembrallDataProvider
 
         this.resetOrder( this.itemNodes );
 
-        this._context.globalState.update( 'remembrall.items', this.itemNodes );
+        this.storeNodes();
     }
 
     rebuild( nodes, parent )
@@ -174,7 +185,7 @@ class RemembrallDataProvider
             node.id = nodeCounter++;
             if( !node.uniqueId )
             {
-                node.uniqueId = uuidv4();
+                node.uniqueId = utils.uuidv4();
             }
             node.contextValue = '';
             if( parent )
@@ -212,10 +223,9 @@ class RemembrallDataProvider
 
     refresh()
     {
-        this.itemNodes = this._context.globalState.get( 'remembrall.items' ) || [];
+        this.fetchNodes();
         this.rebuild();
         this.resetOrder( this.itemNodes );
-        this._context.globalState.update( 'remembrall.items', this.itemNodes )
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', this.itemNodes.length > 0 );
     }
@@ -245,7 +255,7 @@ class RemembrallDataProvider
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index - 1 );
-            this._context.globalState.update( 'remembrall.items', this.itemNodes );
+            this.storeNodes();
             this.refresh();
         }
     }
@@ -256,7 +266,7 @@ class RemembrallDataProvider
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index + 1 );
-            this._context.globalState.update( 'remembrall.items', this.itemNodes );
+            this.storeNodes();
             this.refresh();
         }
     }
@@ -270,7 +280,7 @@ class RemembrallDataProvider
             var child = located.nodes.splice( located.index, 1 );
             child.parent = parent;
             parent.nodes.push( child[ 0 ] );
-            this._context.globalState.update( 'remembrall.items', this.itemNodes );
+            this.storeNodes();
             this.refresh();
         }
     }
@@ -287,7 +297,7 @@ class RemembrallDataProvider
             var parentNodes = grandparent ? grandparent.nodes : this.itemNodes;
             var parentIndex = parentNodes.map( function( e ) { return e.uniqueId; } ).indexOf( parent.uniqueId );
             parentNodes.splice( parentIndex + 1, 0, child );
-            this._context.globalState.update( 'remembrall.items', this.itemNodes );
+            this.storeNodes();
             this.refresh();
         }
     }
