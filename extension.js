@@ -316,6 +316,28 @@ function activate( context )
         }
     }
 
+    function setIcon( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showInputBox( { placeHolder: "Enter an octicon name...", prompt: "See https://octicons.github.com/ for available icons" } ).then( function( icon )
+            {
+                if( icon )
+                {
+                    remembrallTree.setIcon( node, icon );
+                    remembrallTree.refresh();
+                    storage.triggerBackup( onLocalDataUpdated );
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
     function register()
     {
         resetOutputChannel();
@@ -339,6 +361,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetSync', storage.resetSync ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.export', exportTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.import', importTree ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIcon', setIcon ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );

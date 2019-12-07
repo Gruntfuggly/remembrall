@@ -1,5 +1,7 @@
 var vscode = require( 'vscode' );
+var fs = require( 'fs' );
 var path = require( 'path' );
+var octicons = require( 'octicons' );
 var utils = require( './utils' );
 
 var expandedNodes = {};
@@ -75,9 +77,39 @@ class RemembrallDataProvider
     getIcon( name )
     {
         var icon = {
-            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", name + ".svg" ) ),
-            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", name + ".svg" ) )
+            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", "remembrall.svg" ) ),
+            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", "remembrall.svg" ) )
         };
+
+        if( octicons[ name ] )
+        {
+            if( this._context.globalStoragePath )
+            {
+                if( !fs.existsSync( this._context.globalStoragePath ) )
+                {
+                    fs.mkdirSync( this._context.globalStoragePath );
+                }
+
+                var darkIconPath = path.join( this._context.globalStoragePath, name + "-dark.svg" );
+                if( !fs.existsSync( darkIconPath ) )
+                {
+                    var darkIcon = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
+                        octicons[ name ].toSVG( { "xmlns": "http://www.w3.org/2000/svg", "fill": "#C5C5C5" } );
+                    fs.writeFileSync( darkIconPath, darkIcon );
+                }
+
+                var lightIconPath = path.join( this._context.globalStoragePath, name + "-light.svg" );
+                if( !fs.existsSync( lightIconPath ) )
+                {
+                    var lightIcon = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
+                        octicons[ name ].toSVG( { "xmlns": "http://www.w3.org/2000/svg", "fill": "424242" } );
+
+                    fs.writeFileSync( lightIconPath, lightIcon );
+                }
+
+                icon = { dark: darkIconPath, light: lightIconPath };
+            }
+        }
 
         return icon;
     }
@@ -164,6 +196,12 @@ class RemembrallDataProvider
         this.storeNodes();
     }
 
+    setIcon( item, icon )
+    {
+        item.icon = icon;
+        this.storeNodes();
+    }
+
     remove( node )
     {
         var located = this.locateNode( node );
@@ -204,7 +242,7 @@ class RemembrallDataProvider
     {
         nodes = nodes.map( function( node, index )
         {
-            node.contextValue += 'canEdit canDelete';
+            node.contextValue += 'canEdit canDelete canSetIcon';
             if( index !== 0 )
             {
                 node.contextValue += ' canMoveUp canParent';

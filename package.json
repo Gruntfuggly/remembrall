@@ -1,7 +1,7 @@
 {
     "name": "remembrall",
     "displayName": "Remembrall",
-    "description": "A simple extension that provides a todo list",
+    "description": "A simple extension that provides a syncable todo list",
     "icon": "resources/remembrall.png",
     "version": "0.0.1",
     "publisher": "Gruntfuggly",
@@ -94,6 +94,10 @@
                     "command": "remembrall.remove",
                     "when": "view =~ /remembrall/ && viewItem =~ /canDelete/",
                     "group": "inline@6"
+                },
+                {
+                    "command": "remembrall.setIcon",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
                 }
             ]
         },
@@ -236,6 +240,11 @@
                 }
             },
             {
+                "command": "remembrall.setIcon",
+                "title": "Set Icon",
+                "category": "Remembrall"
+            },
+            {
                 "command": "remembrall.import",
                 "title": "Import",
                 "category": "Remembrall"
@@ -251,6 +260,7 @@
         "vscode": "^1.0.0"
     },
     "dependencies": {
-        "gistore": "^0.1.1"
+        "gistore": "^0.1.1",
+        "octicons": "^8.5.0"
     }
 }
