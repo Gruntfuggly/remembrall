@@ -166,44 +166,44 @@ function sync( callback )
 
                         if( state.get( 'remembrall.lastSync' ) === undefined || new Date( data.remembrallSync.lastSync ) > new Date( state.get( 'remembrall.lastSync' ) ) )
                         {
-                            var storedVersion = state.get( 'remembrall.version' );
-                            if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
+                            // var storedVersion = state.get( 'remembrall.version' );
+                            // if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
+                            // {
+                            debug( " last update:" + lastUpdate );
+                            if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
                             {
-                                debug( " last update:" + lastUpdate );
-                                if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
+                                debug( "Query: local tree is newer than the backup" );
+                                vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
                                 {
-                                    debug( "Query: local tree is newer than the backup" );
-                                    vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                                    if( confirm === 'Overwrite' )
                                     {
-                                        if( confirm === 'Overwrite' )
-                                        {
-                                            debug( "Response: Overwrite local data" );
-                                            doUpdate( data, callback );
-                                        }
-                                        else if( confirm === 'Keep Local' )
-                                        {
-                                            debug( "Response: Keep local data" );
-                                            triggerBackup( callback );
-                                        }
-                                        else
-                                        {
-                                            debug( "Response: Cancelled" );
-                                        }
-                                    } );
-                                }
-                                else
-                                {
-                                    doUpdate( data, callback );
-                                }
+                                        debug( "Response: Overwrite local data" );
+                                        doUpdate( data, callback );
+                                    }
+                                    else if( confirm === 'Keep Local' )
+                                    {
+                                        debug( "Response: Keep local data" );
+                                        triggerBackup( callback );
+                                    }
+                                    else
+                                    {
+                                        debug( "Response: Cancelled" );
+                                    }
+                                } );
                             }
                             else
                             {
-                                debug( "Warning: Ignoring synced state from older version" );
-                                if( callback )
-                                {
-                                    callback();
-                                }
+                                doUpdate( data, callback );
                             }
+                            // }
+                            // else
+                            // {
+                            //     debug( "Warning: Ignoring synced state from older version" );
+                            //     if( callback )
+                            //     {
+                            //         callback();
+                            //     }
+                            // }
                         }
                         else
                         {
@@ -281,90 +281,90 @@ function backup( callback )
             gistore.sync().then( function( data )
             {
                 var storedVersion = state.get( 'remembrall.version' );
-                if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
+                // if( storedVersion === undefined || utils.compareVersions( version, storedVersion ) >= 0 )
+                // {
+                var cleanedNodes = utils.cleanNodes( fetchNodes() );
+
+                if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
                 {
-                    var cleanedNodes = utils.cleanNodes( fetchNodes() );
+                    var now = new Date();
 
-                    if( JSON.stringify( data.remembrallSync.items ) !== JSON.stringify( cleanedNodes ) )
+                    if( data.remembrallSync.lastSync < lastUpdate )
                     {
-                        var now = new Date();
-
-                        if( data.remembrallSync.lastSync < lastUpdate )
+                        vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Replace Backup', 'Overwrite Local' ).then( function( confirm )
                         {
-                            vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Replace Backup', 'Overwrite Local' ).then( function( confirm )
+                            debug( "Query: local tree is newer than the backup" );
+
+                            if( confirm === 'Replace Backup' )
                             {
-                                debug( "Query: local tree is newer than the backup" );
+                                debug( "Response: Replacing backup with local data..." );
 
-                                if( confirm === 'Replace Backup' )
+                                now = new Date();
+
+                                gistore.backUp( {
+                                    remembrallSync: {
+                                        items: cleanedNodes,
+                                        version: version,
+                                        lastSync: now,
+                                        by: os.hostname()
+                                    }
+                                } ).then( function()
                                 {
-                                    debug( "Response: Replacing backup with local data..." );
-
-                                    now = new Date();
-
-                                    gistore.backUp( {
-                                        remembrallSync: {
-                                            items: cleanedNodes,
-                                            version: version,
-                                            lastSync: now,
-                                            by: os.hostname()
-                                        }
-                                    } ).then( function()
-                                    {
-                                        debug( "Info: Backup complete at " + now.toISOString() );
-                                        state.update( 'remembrall.lastSync', now );
-                                        processQueue();
-                                    } ).catch( function( error )
-                                    {
-                                        console.error( "Error: Backup failed: " + error );
-                                        triggerBackup();
-                                        processQueue();
-                                    } );
-                                }
-                                else if( confirm === 'Overwrite Local' )
+                                    debug( "Info: Backup complete at " + now.toISOString() );
+                                    state.update( 'remembrall.lastSync', now );
+                                    processQueue();
+                                } ).catch( function( error )
                                 {
-                                    debug( "Response: Overwrite local data with backup" );
-                                    doUpdate( data, callback );
-                                }
-                                else
-                                {
-                                    debug( "Response: Cancelled" );
-                                }
-                            } );
-                        }
-                        else
-                        {
-                            debug( "Starting backup at " + now.toISOString() );
-
-                            gistore.backUp( {
-                                remembrallSync: {
-                                    items: cleanedNodes,
-                                    version: version,
-                                    lastSync: now,
-                                    by: os.hostname()
-                                }
-                            } ).then( function()
+                                    console.error( "Error: Backup failed: " + error );
+                                    triggerBackup();
+                                    processQueue();
+                                } );
+                            }
+                            else if( confirm === 'Overwrite Local' )
                             {
-                                debug( "Info: Backup complete at " + now.toISOString() );
-                                state.update( 'remembrall.lastSync', now );
-                                processQueue();
-                            } ).catch( function( error )
+                                debug( "Response: Overwrite local data with backup" );
+                                doUpdate( data, callback );
+                            }
+                            else
                             {
-                                console.error( "Error: backup failed: " + error );
-                                triggerBackup();
-                                processQueue();
-                            } );
-                        }
+                                debug( "Response: Cancelled" );
+                            }
+                        } );
                     }
                     else
                     {
-                        debug( "Info: Ignoring unchanged data" );
-                        processQueue();
+                        debug( "Starting backup at " + now.toISOString() );
+
+                        gistore.backUp( {
+                            remembrallSync: {
+                                items: cleanedNodes,
+                                version: version,
+                                lastSync: now,
+                                by: os.hostname()
+                            }
+                        } ).then( function()
+                        {
+                            debug( "Info: Backup complete at " + now.toISOString() );
+                            state.update( 'remembrall.lastSync', now );
+                            processQueue();
+                        } ).catch( function( error )
+                        {
+                            console.error( "Error: backup failed: " + error );
+                            triggerBackup();
+                            processQueue();
+                        } );
                     }
                 }
                 else
                 {
-                    debug( "Warning: Ignoring synced state from older version" );
+                    debug( "Info: Ignoring unchanged data" );
+                    processQueue();
                 }
+                // }
+                // else
+                // {
+                //     debug( "Warning: Ignoring synced state from older version" );
+                // }
             } ).catch( function( error )
             {
                 if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
