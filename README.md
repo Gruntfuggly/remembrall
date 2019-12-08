@@ -1,7 +1,8 @@
 # Remembrall
 
-This was written as a simple TODO list organiser, but can be used to store any arbitrary text in a tree. The contents of the tree can be optionally synced with other instances of Code using a github gist.
+This was created as a simple TODO list organiser, but can be used to store any arbitrary text in a tree. The contents of the tree can be optionally synced with other instances of Code using a github gist.
 
+Note:
 The following buttons are shown on the tree view title bar:
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.svg?sanitize=true" height="16px" align="center"> Add a new item to the tree<br/>
@@ -17,6 +18,8 @@ Hovering over or selecting items in the tree will show the following buttons:
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/unparent.svg?sanitize=true" height="16px" align="center"> Move the item out of it's current group<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/edit.svg?sanitize=true" height="16px" align="center"> Modify the text of the item<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/trash.svg?sanitize=true" height="16px" align="center"> Remove the item from the tree<br/>
+
+The icon shown in the tree can be changed to an icon from the [octicons](https://octicons.github.com/) set.
 
 ### Configuration
 
@@ -40,9 +43,11 @@ A github gist ID used to store shared settings.
 
 ## Commands
 
-Most interaction is done with the buttons in the tree view, but one extra command is available which doesn't have a button:
-
 **remembrall.createFromSelection** will create a new item in the tree from any text you have selected in the current editor (or multiple items if you have multiple selections).
+
+**remembrall.export** will generate a text file containing the tree contents in JSON format, which can be saved as required.
+
+**remembrall.import** will take the contents of the current editor and import them into the tree replacing any existing content.
 
 ## Installing
 

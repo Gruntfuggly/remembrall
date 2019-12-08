@@ -4,6 +4,7 @@
     "description": "A simple extension that provides a syncable todo list",
     "icon": "resources/remembrall.png",
     "version": "0.0.1",
+    "license": "MIT",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/remembrall",
     "engines": {
