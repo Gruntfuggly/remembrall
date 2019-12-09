@@ -128,6 +128,12 @@ class RemembrallDataProvider
 
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
+        if( node.done )
+        {
+            treeItem.description = node.label;
+            treeItem.label = "";
+        }
+
         if( node.icon )
         {
             treeItem.iconPath = this.getIcon( node.icon );
@@ -170,6 +176,7 @@ class RemembrallDataProvider
             uniqueId: utils.uuidv4(),
             label: item.label,
             icon: 'remembrall',
+            done: false,
             nodes: []
         };
 
@@ -202,6 +209,18 @@ class RemembrallDataProvider
         this.storeNodes();
     }
 
+    markAsDone( item )
+    {
+        item.done = true;
+        this.storeNodes();
+    }
+
+    markAsNew( item )
+    {
+        item.done = false;
+        this.storeNodes();
+    }
+
     remove( node )
     {
         var located = this.locateNode( node );
@@ -226,6 +245,14 @@ class RemembrallDataProvider
                 node.uniqueId = utils.uuidv4();
             }
             node.contextValue = '';
+            if( node.done )
+            {
+                node.contextValue += ' canMarkAsNew';
+            }
+            else
+            {
+                node.contextValue += ' canMarkAsDone';
+            }
             if( parent )
             {
                 node.parent = parent;

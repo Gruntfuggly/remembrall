@@ -99,6 +99,14 @@
                 {
                     "command": "remembrall.setIcon",
                     "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
+                },
+                {
+                    "command": "remembrall.markAsDone",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsDone/"
+                },
+                {
+                    "command": "remembrall.markAsNew",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsNew/"
                 }
             ]
         },
@@ -253,6 +261,16 @@
             {
                 "command": "remembrall.export",
                 "title": "Export",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.markAsDone",
+                "title": "Mark As Done",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.markAsNew",
+                "title": "Mark As New",
                 "category": "Remembrall"
             }
         ]

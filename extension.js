@@ -338,6 +338,38 @@ function activate( context )
         }
     }
 
+    function markAsDone( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            remembrallTree.markAsDone( node );
+            remembrallTree.refresh();
+            storage.triggerBackup( onLocalDataUpdated );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
+    function markAsNew( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            remembrallTree.markAsNew( node );
+            remembrallTree.refresh();
+            storage.triggerBackup( onLocalDataUpdated );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
     function register()
     {
         resetOutputChannel();
@@ -362,6 +394,8 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.export', exportTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.import', importTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIcon', setIcon ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', markAsDone ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', markAsNew ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );

@@ -43,11 +43,15 @@ A github gist ID used to store shared settings.
 
 ## Commands
 
-**remembrall.createFromSelection** will create a new item in the tree from any text you have selected in the current editor (or multiple items if you have multiple selections).
+**Create From Selection** will create a new item in the tree from any text you have selected in the current editor (or multiple items if you have multiple selections).
 
-**remembrall.export** will generate a text file containing the tree contents in JSON format, which can be saved as required.
+**Mark As Done** will subsequently show the item in a smaller font
 
-**remembrall.import** will take the contents of the current editor and import them into the tree replacing any existing content.
+**Mark As New** will revert the **Mark As Done** command
+
+**Export** will generate a text file containing the tree contents in JSON format, which can be saved as required.
+
+**Import** will take the contents of the current editor and import them into the tree replacing any existing content.
 
 ## Installing
 
