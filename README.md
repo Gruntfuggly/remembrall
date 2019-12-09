@@ -2,6 +2,8 @@
 
 This was created as a simple TODO list organiser, but can be used to store any arbitrary text in a tree. The contents of the tree can be optionally synced with other instances of Code using a github gist.
 
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/screenshot.png">
+
 Note:
 The following buttons are shown on the tree view title bar:
 
