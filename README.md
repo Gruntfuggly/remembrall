@@ -4,7 +4,10 @@ This was created as a simple TODO list organiser, but can be used to store any a
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/screenshot.png">
 
-Note:
+*Note: Sync is done via a secret github gist. These are not public, not discoverable via github and are not searchable. However, they are not encrypted or protected in any other way. If someone discovers the URL for your gist or you share it with somebody, they will be able to view it's contents. **For this reason, it is recommended that you do not store private or sensitive information in your tree**.*
+
+## Controls
+
 The following buttons are shown on the tree view title bar:
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.svg?sanitize=true" height="16px" align="center"> Add a new item to the tree<br/>
@@ -21,7 +24,13 @@ Hovering over or selecting items in the tree will show the following buttons:
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/edit.svg?sanitize=true" height="16px" align="center"> Modify the text of the item<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/trash.svg?sanitize=true" height="16px" align="center"> Remove the item from the tree<br/>
 
-The icon shown in the tree can be changed to an icon from the [octicons](https://octicons.github.com/) set.
+There is also a context menu providing the following commands:
+
+**Set Icon**<br/>
+Change the icon shown in the tree to one from the [octicons](https://octicons.github.com/) set.
+
+**Mark As Done/Mark As New**<br/>
+Show the item in a smaller font if you want to show it as done, but not delete it yet.
 
 ### Configuration
 
@@ -42,6 +51,27 @@ A github token to allow sync via gist.
 
 **remembrall.syncGistId**<br/>
 A github gist ID used to store shared settings.
+
+## Syncing
+
+When syncing is enabled, you'll need to provide a github personal access token:
+
+1. Log in to your github account
+2. Visit https://github.com/settings/tokens
+3. Click the **Generate new token** button
+4. Enter 'remembrall' in the Note field, select the 'Create gists' checkbox, then click the **Generate token** button.
+5. Copy the new personal access token.
+6. Paste it into your `remembrall.syncToken` settings.
+
+You can use the same personal access token for each instance of Code that you want to sync, or you can create a new one each time.
+
+If you have already set up sync from another instance of Code, once the token has been set, Remembrall should automatically find the existing gist and sync it. If this is the initial set up, a new gist will be created and populated with your current tree.
+
+### Troubleshooting
+
+If you see `Request failed with status code 401` then your access token is not valid. Ensure that the token has the *Create gists* scope.
+
+If you see `Request failed with status code 404` then the gist can't be found. Try clearing the `remembrall.syncGistId` setting and refreshing the tree.
 
 ## Commands
 
@@ -66,3 +96,5 @@ The source code is available on GitHub [here](https://github.com/Gruntfuggly/rem
 ## Credits
 
 Icon by [Anton Gerasimenko](http://www.iconarchive.com/artist/anton-gerasimenko.html).
+
+Uses a modified version of [gistore](https://github.com/cwj0417/gistore).

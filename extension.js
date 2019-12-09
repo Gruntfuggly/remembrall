@@ -416,8 +416,9 @@ function activate( context )
                 }
                 else if(
                     e.affectsConfiguration( 'remembrall.syncEnabled' ) ||
-                    e.affectsConfiguration( 'remembrall.syncGistId' ) )
+                    e.affectsConfiguration( 'remembrall.syncToken' ) )
                 {
+                    debug( "Info: sync configuration updated" );
                     storage.initializeSync( extensionVersion, function()
                     {
                         if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
@@ -426,8 +427,9 @@ function activate( context )
                         }
                     } );
                 }
-                else if( e.affectsConfiguration( 'remembrall.syncToken' ) )
+                else if( e.affectsConfiguration( 'remembrall.syncGistId' ) )
                 {
+                    storage.resetId( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ), refresh() );
                 }
                 else
                 {

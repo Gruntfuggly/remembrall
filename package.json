@@ -135,7 +135,7 @@
                 },
                 "remembrall.syncToken": {
                     "type": "string",
-                    "description": "A github token to allow sync via gist"
+                    "markdownDescription": "1. Log in to your github account\n2. Visit https://github.com/settings/tokens\n3. Click the **Generate new token** button\n4. Enter 'remembrall' in the Note field and select the 'Create gists' checkbox.\n5. Copy new the personal access token.\n6. Paste it into the field below."
                 },
                 "remembrall.syncGistId": {
                     "type": "string",

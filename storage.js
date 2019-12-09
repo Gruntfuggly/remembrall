@@ -1,6 +1,6 @@
 var vscode = require( 'vscode' );
-var gistore = require( 'gistore' );
 var os = require( 'os' );
+var gistore = require( './gistore' );
 var utils = require( './utils' );
 
 var generalOutputChannel;
@@ -10,6 +10,8 @@ var lastUpdate = new Date();
 var backupTimer;
 var queue = [];
 var version;
+
+var OPEN_SETTINGS = 'Open Settings';
 
 function initialize( globalState, currentVersion )
 {
@@ -80,30 +82,64 @@ function initializeSync( currentVersion, callback )
         }
         else
         {
-            debug( "Info: Creating new gist..." );
-
-            gistore.createBackUp( 'remembrallSync',
+            debug( "Debug: Fetching gists..." );
+            gistore.getList().then( function( list )
+            {
+                var found = false;
+                list.map( function( gist )
                 {
-                    remembrallSync: {
-                        items: utils.cleanNodes( fetchNodes() ),
-                        version: version,
-                        lastSync: new Date(),
-                        by: os.hostname()
-                    }
-                } )
-                .then( function( id )
-                {
-                    debug( "Info: New gist " + id );
-                    vscode.workspace.getConfiguration( 'remembrall' ).update( 'syncGistId', id, true );
-
-                    if( callback )
+                    if( found === false )
                     {
-                        callback();
+                        if( gist.description === 'remembrallSync' )
+                        {
+                            debug( "Info: Found existing gist " + gist.id );
+                            vscode.workspace.getConfiguration( 'remembrall' ).update( 'syncGistId', gist.id, true );
+                            gistore.setId( gist.id );
+                            found = true;
+                        }
                     }
                 } );
+                if( found === false )
+                {
+                    debug( "Info: Creating new gist..." );
+
+                    var data = {
+                        remembrallSync: {
+                            items: utils.cleanNodes( fetchNodes() ),
+                            version: version,
+                            lastSync: new Date(),
+                            by: os.hostname()
+                        }
+                    };
+
+                    gistore.createBackUp( 'remembrallSync', data ).then( function( id )
+                    {
+                        debug( "Info: New gist " + id );
+                        vscode.workspace.getConfiguration( 'remembrall' ).update( 'syncGistId', id, true ).then( function()
+                        {
+                            if( callback )
+                            {
+                                callback();
+                            }
+                        } );
+                    } );
+                }
+            } );
         }
     }
     else if( callback )
+    {
+        callback();
+    }
+}
+
+function resetId( gistId, callback )
+{
+    debug( "Info: Reset gist " + gistId );
+
+    gistore.setId( gistId );
+
+    if( callback )
     {
         callback();
     }
@@ -142,7 +178,40 @@ function sync( callback )
     function doSync( callback )
     {
         debug( "Debug: doSync" );
-        if( gistore.token )
+
+        if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
+        {
+            vscode.window.showErrorMessage( "No sync token defined", OPEN_SETTINGS ).then( function( button )
+            {
+                if( button === OPEN_SETTINGS )
+                {
+                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncToken' );
+                }
+            } );
+
+            if( callback )
+            {
+                callback();
+            }
+            processQueue();
+        }
+        else if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ) )
+        {
+            vscode.window.showErrorMessage( "No sync gist ID defined", OPEN_SETTINGS ).then( function( button )
+            {
+                if( button === OPEN_SETTINGS )
+                {
+                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncGistId' );
+                }
+            } );
+
+            if( callback )
+            {
+                callback();
+            }
+            processQueue();
+        }
+        else if( gistore.token )
         {
             gistore.sync().then( function( data )
             {
@@ -227,10 +296,8 @@ function sync( callback )
                 processQueue();
             } ).catch( function( error )
             {
-                if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
-                {
-                    debug( "Error: sync failed: " + error );
-                }
+                debug( "Error: sync failed: " + error );
+                vscode.window.showErrorMessage( "Sync failed: " + error );
 
                 if( callback )
                 {
@@ -239,16 +306,6 @@ function sync( callback )
 
                 processQueue();
             } );
-        }
-        else
-        {
-            debug( "Info: No sync token defined" );
-
-            if( callback )
-            {
-                callback();
-            }
-            processQueue();
         }
     }
 
@@ -276,7 +333,39 @@ function backup( callback )
     function doBackup()
     {
         debug( "Debug: doBackup" );
-        if( gistore.token )
+        if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
+        {
+            vscode.window.showErrorMessage( "No sync token defined", OPEN_SETTINGS ).then( function( button )
+            {
+                if( button === OPEN_SETTINGS )
+                {
+                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncToken' );
+                }
+            } );
+
+            if( callback )
+            {
+                callback();
+            }
+            processQueue();
+        }
+        else if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ) )
+        {
+            vscode.window.showErrorMessage( "No sync gist ID defined", OPEN_SETTINGS ).then( function( button )
+            {
+                if( button === OPEN_SETTINGS )
+                {
+                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncGistId' );
+                }
+            } );
+
+            if( callback )
+            {
+                callback();
+            }
+            processQueue();
+        }
+        else if( gistore.token )
         {
             gistore.sync().then( function( data )
             {
@@ -367,10 +456,8 @@ function backup( callback )
                 // }
             } ).catch( function( error )
             {
-                if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
-                {
-                    debug( "Error: sync failed: " + error );
-                }
+                debug( "Error: sync failed: " + error );
+                vscode.window.showErrorMessage( "Sync failed: " + error );
 
                 processQueue();
             } );
@@ -435,6 +522,7 @@ function resetSync()
 }
 
 module.exports.initialize = initialize;
+module.exports.resetId = resetId;
 module.exports.setOutputChannel = setOutputChannel;
 module.exports.setActive = setActive;
 module.exports.initializeSync = initializeSync;
