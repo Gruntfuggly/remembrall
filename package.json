@@ -97,6 +97,10 @@
                     "group": "inline@6"
                 },
                 {
+                    "command": "remembrall.createChild",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canAddChild/"
+                },
+                {
                     "command": "remembrall.setIcon",
                     "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
                 },
@@ -179,6 +183,15 @@
             {
                 "command": "remembrall.create",
                 "title": "Create New Item",
+                "category": "Remembrall",
+                "icon": {
+                    "dark": "resources/icons/dark/add.svg",
+                    "light": "resources/icons/light/add.svg"
+                }
+            },
+            {
+                "command": "remembrall.createChild",
+                "title": "Create New Child Item",
                 "category": "Remembrall",
                 "icon": {
                     "dark": "resources/icons/dark/add.svg",

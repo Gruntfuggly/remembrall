@@ -131,12 +131,37 @@ function activate( context )
         {
             if( item )
             {
-                var node = remembrallTree.add( { label: item }, selectedNode() );
-                remembrallTree.refresh();
-                selectNode( node );
-                storage.triggerBackup( onLocalDataUpdated );
+                var node = remembrallTree.add( { label: item }, selectedNode(), function()
+                {
+                    storage.triggerBackup( onLocalDataUpdated );
+                    selectNode( node );
+                } );
             }
         } );
+    }
+
+    function createChild( node )
+    {
+        var parentNode = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showInputBox( { placeHolder: "Enter something to remember..." } ).then( function( item )
+            {
+                if( item )
+                {
+                    var node = remembrallTree.addChild( { label: item }, parentNode, function()
+                    {
+                        storage.triggerBackup( onLocalDataUpdated );
+                        selectNode( node );
+                    } );
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
     }
 
     function createFromSelection()
@@ -383,6 +408,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.collapse', collapse ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetCache', resetCache ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.create', create ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.createChild', createChild ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.createFromSelection', createFromSelection ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.edit', edit ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.remove', remove ) );

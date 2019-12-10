@@ -38,6 +38,7 @@ class RemembrallDataProvider
     {
         var nodeData = JSON.stringify( utils.cleanNodes( this.itemNodes ) );
         this._context.globalState.update( 'remembrall.items', nodeData );
+        this._onDidChangeTreeData.fire();
     }
 
     setOutputChannel( outputChannel )
@@ -197,6 +198,26 @@ class RemembrallDataProvider
         return itemNode;
     }
 
+    addChild( item, parentNode )
+    {
+        var itemNode = {
+            id: nodeCounter++,
+            uniqueId: utils.uuidv4(),
+            label: item.label,
+            icon: 'remembrall',
+            done: false,
+            nodes: [],
+            parent: parentNode,
+        };
+
+        parentNode.nodes.push( itemNode );
+
+        this.resetOrder( this.itemNodes );
+        this.storeNodes();
+
+        return itemNode;
+    }
+
     edit( item, update )
     {
         item.label = update;
@@ -269,7 +290,7 @@ class RemembrallDataProvider
     {
         nodes = nodes.map( function( node, index )
         {
-            node.contextValue += 'canEdit canDelete canSetIcon';
+            node.contextValue += 'canEdit canDelete canSetIcon canAddChild';
             if( index !== 0 )
             {
                 node.contextValue += ' canMoveUp canParent';

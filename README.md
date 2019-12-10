@@ -26,6 +26,9 @@ Hovering over or selecting items in the tree will show the following buttons:
 
 There is also a context menu providing the following commands:
 
+**Create New Child Item**<br/>
+Creates a new item as a child of the selected item.
+
 **Set Icon**<br/>
 Change the icon shown in the tree to one from the [octicons](https://octicons.github.com/) set.
 
