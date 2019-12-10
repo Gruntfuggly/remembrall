@@ -98,27 +98,33 @@
                 },
                 {
                     "command": "remembrall.createChild",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canAddChild/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canAddChild/",
+                    "group": "remembrall@1"
                 },
                 {
                     "command": "remembrall.moveToTop",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveUp/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveUp/",
+                    "group": "remembrall@2"
                 },
                 {
                     "command": "remembrall.moveToBottom",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveDown/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveDown/",
+                    "group": "remembrall@3"
                 },
                 {
                     "command": "remembrall.markAsDone",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsDone/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsDone/",
+                    "group": "remembrall@4"
                 },
                 {
                     "command": "remembrall.markAsNew",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsNew/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsNew/",
+                    "group": "remembrall@5"
                 },
                 {
                     "command": "remembrall.setIcon",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
+                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/",
+                    "group": "remembrall@6"
                 }
             ]
         },
