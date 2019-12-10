@@ -444,6 +444,7 @@ function activate( context )
             if( e.focused )
             {
                 remembrallTree.refresh();
+                refresh();
             }
         } ) );
 
