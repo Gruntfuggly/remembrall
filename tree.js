@@ -191,8 +191,8 @@ class RemembrallDataProvider
             this.itemNodes.push( itemNode );
         }
 
+        this.rebuild();
         this.resetOrder( this.itemNodes );
-
         this.storeNodes();
 
         return itemNode;
@@ -212,6 +212,7 @@ class RemembrallDataProvider
 
         parentNode.nodes.push( itemNode );
 
+        this.rebuild();
         this.resetOrder( this.itemNodes );
         this.storeNodes();
 
@@ -352,6 +353,28 @@ class RemembrallDataProvider
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index + 1 );
+            this.storeNodes();
+            this.refresh();
+        }
+    }
+
+    moveToTop( node )
+    {
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
+        {
+            this.swap( located.nodes, located.index, 0 );
+            this.storeNodes();
+            this.refresh();
+        }
+    }
+
+    moveToBottom( node )
+    {
+        var located = this.locateNode( node );
+        if( located.index !== undefined )
+        {
+            this.swap( located.nodes, located.index, located.nodes.length - 1 );
             this.storeNodes();
             this.refresh();
         }

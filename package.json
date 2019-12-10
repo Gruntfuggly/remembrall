@@ -101,8 +101,12 @@
                     "when": "view =~ /remembrall/ && viewItem =~ /canAddChild/"
                 },
                 {
-                    "command": "remembrall.setIcon",
-                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
+                    "command": "remembrall.moveToTop",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveUp/"
+                },
+                {
+                    "command": "remembrall.moveToBottom",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canMoveDown/"
                 },
                 {
                     "command": "remembrall.markAsDone",
@@ -111,6 +115,10 @@
                 {
                     "command": "remembrall.markAsNew",
                     "when": "view =~ /remembrall/ && viewItem =~ /canMarkAsNew/"
+                },
+                {
+                    "command": "remembrall.setIcon",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/"
                 }
             ]
         },
@@ -190,15 +198,6 @@
                 }
             },
             {
-                "command": "remembrall.createChild",
-                "title": "Create New Child Item",
-                "category": "Remembrall",
-                "icon": {
-                    "dark": "resources/icons/dark/add.svg",
-                    "light": "resources/icons/light/add.svg"
-                }
-            },
-            {
                 "command": "remembrall.createFromSelection",
                 "title": "Create New Item From Selection",
                 "category": "Remembrall",
@@ -260,6 +259,21 @@
                     "dark": "resources/icons/dark/unparent.svg",
                     "light": "resources/icons/light/unparent.svg"
                 }
+            },
+            {
+                "command": "remembrall.createChild",
+                "title": "Create New Child Item",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.moveToTop",
+                "title": "Move To Top",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.moveToBottom",
+                "title": "Move To Bottom",
+                "category": "Remembrall"
             },
             {
                 "command": "remembrall.setIcon",

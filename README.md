@@ -84,6 +84,8 @@ If you see `Request failed with status code 404` then the gist can't be found. T
 
 **Mark As New** will revert the **Mark As Done** command
 
+**Move To Top** and **Move To Bottom** will move the selected item to the top or bottom of it's list of siblings.
+
 **Export** will generate a text file containing the tree contents in JSON format, which can be saved as required.
 
 **Import** will take the contents of the current editor and import them into the tree replacing any existing content.

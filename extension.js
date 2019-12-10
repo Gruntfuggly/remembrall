@@ -263,6 +263,8 @@ function activate( context )
 
     function moveUp( node ) { nodeFunction( remembrallTree.moveUp, node ); }
     function moveDown( node ) { nodeFunction( remembrallTree.moveDown, node ); }
+    function moveToTop( node ) { nodeFunction( remembrallTree.moveToTop, node ); }
+    function moveToBottom( node ) { nodeFunction( remembrallTree.moveToBottom, node ); }
     function makeChild( node ) { nodeFunction( remembrallTree.makeChild, node ); }
     function unparent( node ) { nodeFunction( remembrallTree.unparent, node ); }
 
@@ -414,6 +416,8 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.remove', remove ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveUp', moveUp ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveDown', moveDown ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveToTop', moveToTop ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.moveToBottom', moveToBottom ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.makeChild', makeChild ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.unparent', unparent ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.resetSync', storage.resetSync ) );
