@@ -12,6 +12,10 @@ var queue = [];
 var version;
 
 var OPEN_SETTINGS = 'Open Settings';
+var KEEP_LOCAL = 'Keep Local';
+var OVERWRITE = 'Overwrite';
+var REPLACE_BACKUP = 'Replace Backup';
+var OVERWRITE_LOCAL = 'Overwrite Local';
 
 function initialize( globalState, currentVersion )
 {
@@ -57,6 +61,15 @@ function fetchNodes()
     }
 }
 
+function logAndCallback( error, callback )
+{
+    debug( error );
+    if( callback )
+    {
+        callback();
+    }
+}
+
 function initializeSync( currentVersion, callback )
 {
     version = currentVersion;
@@ -71,14 +84,8 @@ function initializeSync( currentVersion, callback )
 
         if( gistId )
         {
-            debug( "Info: Reading from gist " + gistId );
-
             gistore.setId( gistId );
-
-            if( callback )
-            {
-                callback();
-            }
+            logAndCallback( "Info: Reading from gist " + gistId, callback );
         }
         else
         {
@@ -114,13 +121,9 @@ function initializeSync( currentVersion, callback )
 
                     gistore.createBackUp( 'remembrallSync', data ).then( function( id )
                     {
-                        debug( "Info: New gist " + id );
                         vscode.workspace.getConfiguration( 'remembrall' ).update( 'syncGistId', id, true ).then( function()
                         {
-                            if( callback )
-                            {
-                                callback();
-                            }
+                            logAndCallback( "Info: New gist " + id, callback );
                         } );
                     } );
                 }
@@ -135,14 +138,8 @@ function initializeSync( currentVersion, callback )
 
 function resetId( gistId, callback )
 {
-    debug( "Info: Reset gist " + gistId );
-
     gistore.setId( gistId );
-
-    if( callback )
-    {
-        callback();
-    }
+    logAndCallback( "Info: Reset gist " + gistId, callback );
 }
 
 var enqueue = function( fn, context, params )
@@ -163,14 +160,34 @@ function processQueue()
 
 function doUpdate( data, callback )
 {
-    debug( "Info: Updating local data" );
-
-    state.update( 'remembrall.items', JSON.stringify( data.remembrallSync.items ) );
-
-    if( callback )
+    state.update( 'remembrall.items', JSON.stringify( data.remembrallSync.items ) ).then( function()
     {
-        callback();
+        logAndCallback( "Info: Updated local data", callback );
+    } );
+}
+
+function checkSetting( setting, callback )
+{
+    if( !vscode.workspace.getConfiguration( 'remembrall' ).get( setting ) )
+    {
+        vscode.window.showErrorMessage( setting + " mot defined", OPEN_SETTINGS ).then( function( button )
+        {
+            if( button === OPEN_SETTINGS )
+            {
+                vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.' + setting );
+            }
+        } );
+
+        if( callback )
+        {
+            callback();
+        }
+        processQueue();
+
+        return false;
     }
+
+    return true;
 }
 
 function sync( callback )
@@ -179,49 +196,13 @@ function sync( callback )
     {
         debug( "Debug: doSync" );
 
-        if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
-        {
-            vscode.window.showErrorMessage( "No sync token defined", OPEN_SETTINGS ).then( function( button )
-            {
-                if( button === OPEN_SETTINGS )
-                {
-                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncToken' );
-                }
-            } );
-
-            if( callback )
-            {
-                callback();
-            }
-            processQueue();
-        }
-        else if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ) )
-        {
-            vscode.window.showErrorMessage( "No sync gist ID defined", OPEN_SETTINGS ).then( function( button )
-            {
-                if( button === OPEN_SETTINGS )
-                {
-                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncGistId' );
-                }
-            } );
-
-            if( callback )
-            {
-                callback();
-            }
-            processQueue();
-        }
-        else if( gistore.token )
+        if( checkSetting( 'syncToken', callback ) && checkSetting( 'syncGistId', callback ) && gistore.token )
         {
             gistore.sync().then( function( data )
             {
                 if( data.remembrallSync === undefined )
                 {
-                    debug( "Warning: No existing backup" );
-                    if( callback )
-                    {
-                        callback();
-                    }
+                    logAndCallback( "Warning: No existing backup", callback );
                 }
                 else
                 {
@@ -242,14 +223,14 @@ function sync( callback )
                             if( new Date( data.remembrallSync.lastSync ) < lastUpdate )
                             {
                                 debug( "Query: local tree is newer than the backup" );
-                                vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Keep Local', 'Overwrite' ).then( function( confirm )
+                                vscode.window.showInformationMessage( "Your local tree is newer than the backup.", KEEP_LOCAL, OVERWRITE ).then( function( confirm )
                                 {
-                                    if( confirm === 'Overwrite' )
+                                    if( confirm === OVERWRITE )
                                     {
                                         debug( "Response: Overwrite local data" );
                                         doUpdate( data, callback );
                                     }
-                                    else if( confirm === 'Keep Local' )
+                                    else if( confirm === KEEP_LOCAL )
                                     {
                                         debug( "Response: Keep local data" );
                                         triggerBackup( callback );
@@ -276,34 +257,20 @@ function sync( callback )
                         }
                         else
                         {
-                            debug( "Warning: Ignoring out of date remote data" );
-                            if( callback )
-                            {
-                                callback();
-                            }
+                            logAndCallback( "Warning: Ignoring out of date remote data", callback );
                         }
                     }
                     else
                     {
-                        debug( "Info: Ignoring unchanged data" );
-                        if( callback )
-                        {
-                            callback();
-                        }
+                        logAndCallback( "Info: Ignoring unchanged data", callback );
                     }
                 }
 
                 processQueue();
             } ).catch( function( error )
             {
-                debug( "Error: sync failed: " + error );
                 vscode.window.showErrorMessage( "Sync failed: " + error );
-
-                if( callback )
-                {
-                    callback();
-                }
-
+                logAndCallback( "Error: sync failed: " + error, callback );
                 processQueue();
             } );
         }
@@ -330,42 +297,36 @@ function setActive( isActive )
 
 function backup( callback )
 {
+    function updateRemoteData()
+    {
+        var cleanedNodes = utils.cleanNodes( fetchNodes() );
+
+        now = new Date();
+
+        gistore.backUp( {
+            remembrallSync: {
+                items: cleanedNodes,
+                version: version,
+                lastSync: now,
+                by: os.hostname()
+            }
+        } ).then( function()
+        {
+            debug( "Info: Backup complete at " + now.toISOString() );
+            state.update( 'remembrall.lastSync', now );
+            processQueue();
+        } ).catch( function( error )
+        {
+            console.error( "Error: Backup failed: " + error );
+            triggerBackup();
+            processQueue();
+        } );
+    }
+
     function doBackup()
     {
         debug( "Debug: doBackup" );
-        if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncToken' ) )
-        {
-            vscode.window.showErrorMessage( "No sync token defined", OPEN_SETTINGS ).then( function( button )
-            {
-                if( button === OPEN_SETTINGS )
-                {
-                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncToken' );
-                }
-            } );
-
-            if( callback )
-            {
-                callback();
-            }
-            processQueue();
-        }
-        else if( !vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ) )
-        {
-            vscode.window.showErrorMessage( "No sync gist ID defined", OPEN_SETTINGS ).then( function( button )
-            {
-                if( button === OPEN_SETTINGS )
-                {
-                    vscode.commands.executeCommand( 'workbench.action.openSettings', 'remembrall.syncGistId' );
-                }
-            } );
-
-            if( callback )
-            {
-                callback();
-            }
-            processQueue();
-        }
-        else if( gistore.token )
+        if( checkSetting( 'syncToken', callback ) && checkSetting( 'syncGistId', callback ) && gistore.token )
         {
             gistore.sync().then( function( data )
             {
@@ -380,36 +341,17 @@ function backup( callback )
 
                     if( data.remembrallSync.lastSync < lastUpdate )
                     {
-                        vscode.window.showInformationMessage( "Your local tree is newer than the backup.", 'Replace Backup', 'Overwrite Local' ).then( function( confirm )
+                        vscode.window.showInformationMessage( "Your local tree is newer than the backup.", REPLACE_BACKUP, OVERWRITE_LOCAL ).then( function( confirm )
                         {
                             debug( "Query: local tree is newer than the backup" );
 
-                            if( confirm === 'Replace Backup' )
+                            if( confirm === REPLACE_BACKUP )
                             {
                                 debug( "Response: Replacing backup with local data..." );
 
-                                now = new Date();
-
-                                gistore.backUp( {
-                                    remembrallSync: {
-                                        items: cleanedNodes,
-                                        version: version,
-                                        lastSync: now,
-                                        by: os.hostname()
-                                    }
-                                } ).then( function()
-                                {
-                                    debug( "Info: Backup complete at " + now.toISOString() );
-                                    state.update( 'remembrall.lastSync', now );
-                                    processQueue();
-                                } ).catch( function( error )
-                                {
-                                    console.error( "Error: Backup failed: " + error );
-                                    triggerBackup();
-                                    processQueue();
-                                } );
+                                updateRemoteData();
                             }
-                            else if( confirm === 'Overwrite Local' )
+                            else if( confirm === OVERWRITE_LOCAL )
                             {
                                 debug( "Response: Overwrite local data with backup" );
                                 doUpdate( data, callback );
@@ -424,24 +366,7 @@ function backup( callback )
                     {
                         debug( "Starting backup at " + now.toISOString() );
 
-                        gistore.backUp( {
-                            remembrallSync: {
-                                items: cleanedNodes,
-                                version: version,
-                                lastSync: now,
-                                by: os.hostname()
-                            }
-                        } ).then( function()
-                        {
-                            debug( "Info: Backup complete at " + now.toISOString() );
-                            state.update( 'remembrall.lastSync', now );
-                            processQueue();
-                        } ).catch( function( error )
-                        {
-                            console.error( "Error: backup failed: " + error );
-                            triggerBackup();
-                            processQueue();
-                        } );
+                        updateRemoteData();
                     }
                 }
                 else

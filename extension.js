@@ -53,11 +53,35 @@ function activate( context )
         remembrallTree.refresh();
     }
 
+    function reinitializeSync()
+    {
+        storage.initializeSync( extensionVersion, function()
+        {
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
+            {
+                refresh();
+            }
+        } );
+    }
+
     function refresh()
     {
         debug( "Info: Refreshing..." );
 
-        storage.sync( onLocalDataUpdated );
+        remembrallTree.refresh();
+
+        var config = vscode.workspace.getConfiguration( 'remembrall' );
+        if( config.get( 'syncEnabled' ) && config.get( 'syncToken' ) )
+        {
+            if( config.get( 'syncGistId' ) )
+            {
+                storage.sync( onLocalDataUpdated );
+            }
+            else
+            {
+                reinitializeSync();
+            }
+        }
     }
 
     function setContext()
@@ -409,17 +433,11 @@ function activate( context )
                     e.affectsConfiguration( 'remembrall.syncToken' ) )
                 {
                     debug( "Info: sync configuration updated" );
-                    storage.initializeSync( extensionVersion, function()
-                    {
-                        if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
-                        {
-                            refresh();
-                        }
-                    } );
+                    reinitializeSync();
                 }
                 else if( e.affectsConfiguration( 'remembrall.syncGistId' ) )
                 {
-                    storage.resetId( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ), refresh() );
+                    storage.resetId( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ), refresh );
                 }
                 else
                 {
@@ -433,7 +451,6 @@ function activate( context )
             storage.setActive( e.focused );
             if( e.focused )
             {
-                remembrallTree.refresh();
                 refresh();
             }
         } ) );
