@@ -174,30 +174,6 @@ class RemembrallDataProvider
         return itemNode;
     }
 
-    edit( item, update )
-    {
-        item.label = update;
-        this.storeNodes();
-    }
-
-    setIcon( item, icon )
-    {
-        item.icon = icon ? icon : undefined;
-        this.storeNodes();
-    }
-
-    markAsDone( item )
-    {
-        item.done = true;
-        this.storeNodes();
-    }
-
-    markAsNew( item )
-    {
-        item.done = false;
-        this.storeNodes();
-    }
-
     remove( node )
     {
         var located = this.locateNode( node );
@@ -291,45 +267,23 @@ class RemembrallDataProvider
         nodes[ secondIndex ] = temp;
     }
 
-    moveUp( node )
+    move( node, offset )
     {
         var located = this.locateNode( node );
         if( located.index !== undefined )
         {
-            this.swap( located.nodes, located.index, located.index - 1 );
+            this.swap( located.nodes, located.index, located.index + offset );
             this.storeNodes();
             this.refresh();
         }
     }
 
-    moveDown( node )
+    moveTo( node, end )
     {
         var located = this.locateNode( node );
         if( located.index !== undefined )
         {
-            this.swap( located.nodes, located.index, located.index + 1 );
-            this.storeNodes();
-            this.refresh();
-        }
-    }
-
-    moveToTop( node )
-    {
-        var located = this.locateNode( node );
-        if( located.index !== undefined )
-        {
-            this.swap( located.nodes, located.index, 0 );
-            this.storeNodes();
-            this.refresh();
-        }
-    }
-
-    moveToBottom( node )
-    {
-        var located = this.locateNode( node );
-        if( located.index !== undefined )
-        {
-            this.swap( located.nodes, located.index, located.nodes.length - 1 );
+            this.swap( located.nodes, located.index, end === -1 ? 0 : located.nodes.length - 1 );
             this.storeNodes();
             this.refresh();
         }

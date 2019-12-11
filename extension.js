@@ -64,6 +64,13 @@ function activate( context )
         } );
     }
 
+    function updateTree()
+    {
+        remembrallTree.storeNodes();
+        remembrallTree.refresh();
+        storage.triggerBackup( onLocalDataUpdated );
+    }
+
     function refresh()
     {
         debug( "Info: Refreshing..." );
@@ -139,7 +146,7 @@ function activate( context )
         }
     }
 
-    function treeAction( node, method, prompt )
+    function treeAction( node, property, prompt )
     {
         node = node ? node : selectedNode();
 
@@ -149,9 +156,8 @@ function activate( context )
             {
                 if( response !== undefined )
                 {
-                    method.call( remembrallTree, node, response );
-                    remembrallTree.refresh();
-                    storage.triggerBackup( onLocalDataUpdated );
+                    node[ property ] = response;
+                    updateTree();
                 }
             } );
         }
@@ -161,15 +167,14 @@ function activate( context )
         }
     }
 
-    function simpleTreeAction( node, method )
+    function simpleTreeAction( node, property, value )
     {
         node = node ? node : selectedNode();
 
         if( node )
         {
-            method.call( remembrallTree, node );
-            remembrallTree.refresh();
-            storage.triggerBackup( onLocalDataUpdated );
+            node[ property ] = value;
+            updateTree();
         }
         else
         {
@@ -280,29 +285,35 @@ function activate( context )
 
     function edit( node )
     {
-        treeAction( node, remembrallTree.edit, { value: node.label } );
+        treeAction( node, 'label', { value: node.label } );
     }
 
     function setIcon( node )
     {
-        treeAction( node, remembrallTree.setIcon, { placeHolder: "Enter an octicon name...", prompt: "See https://octicons.github.com/ for available icons" } );
+        var prompt =
+        {
+            placeHolder: "Enter an octicon name...",
+            prompt: "For available icons, see: https://octicons.github.com/ "
+        };
+        treeAction( node, 'icon', prompt );
+    }
     }
 
-    function nodeFunction( method, node )
+    function nodeFunction( method, node, argument )
     {
         node = node ? node : selectedNode();
 
         if( node )
         {
-            method.call( remembrallTree, node );
+            method.call( remembrallTree, node, argument );
             storage.triggerBackup( onLocalDataUpdated );
         }
     }
 
-    function moveUp( node ) { nodeFunction( remembrallTree.moveUp, node ); }
-    function moveDown( node ) { nodeFunction( remembrallTree.moveDown, node ); }
-    function moveToTop( node ) { nodeFunction( remembrallTree.moveToTop, node ); }
-    function moveToBottom( node ) { nodeFunction( remembrallTree.moveToBottom, node ); }
+    function moveUp( node ) { nodeFunction( remembrallTree.move, node, -1 ); }
+    function moveDown( node ) { nodeFunction( remembrallTree.move, node, +1 ); }
+    function moveToTop( node ) { nodeFunction( remembrallTree.moveTo, node, -1 ); }
+    function moveToBottom( node ) { nodeFunction( remembrallTree.moveTo, node, +1 ); }
     function makeChild( node ) { nodeFunction( remembrallTree.makeChild, node ); }
     function unparent( node ) { nodeFunction( remembrallTree.unparent, node ); }
 
@@ -408,8 +419,9 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.export', exportTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.import', importTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIcon', setIcon ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', function( node ) { simpleTreeAction( node, remembrallTree.markAsDone ); } ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, remembrallTree.markAsNew ); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIconColour', setIconColour ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', function( node ) { simpleTreeAction( node, 'done', true ); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
