@@ -1,7 +1,5 @@
 var vscode = require( 'vscode' );
-var fs = require( 'fs' );
-var path = require( 'path' );
-var octicons = require( 'octicons' );
+var icons = require( './icons' );
 var utils = require( './utils' );
 
 var expandedNodes = {};
@@ -75,46 +73,6 @@ class RemembrallDataProvider
         }
     }
 
-    getIcon( name )
-    {
-        var icon = {
-            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", "remembrall.svg" ) ),
-            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", "remembrall.svg" ) )
-        };
-
-        if( name && octicons[ name ] )
-        {
-            if( this._context.globalStoragePath )
-            {
-                if( !fs.existsSync( this._context.globalStoragePath ) )
-                {
-                    fs.mkdirSync( this._context.globalStoragePath );
-                }
-
-                var darkIconPath = path.join( this._context.globalStoragePath, name + "-dark.svg" );
-                if( !fs.existsSync( darkIconPath ) )
-                {
-                    var darkIcon = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
-                        octicons[ name ].toSVG( { "xmlns": "http://www.w3.org/2000/svg", "fill": "#C5C5C5" } );
-                    fs.writeFileSync( darkIconPath, darkIcon );
-                }
-
-                var lightIconPath = path.join( this._context.globalStoragePath, name + "-light.svg" );
-                if( !fs.existsSync( lightIconPath ) )
-                {
-                    var lightIcon = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
-                        octicons[ name ].toSVG( { "xmlns": "http://www.w3.org/2000/svg", "fill": "424242" } );
-
-                    fs.writeFileSync( lightIconPath, lightIcon );
-                }
-
-                icon = { dark: darkIconPath, light: lightIconPath };
-            }
-        }
-
-        return icon;
-    }
-
     getParent( node )
     {
         return node.parent;
@@ -135,7 +93,7 @@ class RemembrallDataProvider
             treeItem.label = "";
         }
 
-        treeItem.iconPath = this.getIcon( node.icon );
+        treeItem.iconPath = icons.getIcon( this._context, node.icon );
 
         if( node.nodes && node.nodes.length > 0 )
         {
