@@ -340,6 +340,19 @@ function activate( context )
 
     function resetCache()
     {
+        function purgeFolder( folder )
+        {
+            fs.readdir( folder, function( err, files )
+            {
+                files.map( function( file )
+                {
+                    fs.unlinkSync( path.join( folder, file ) );
+                } );
+            } );
+        }
+
+        purgeFolder( context.globalStoragePath );
+
         context.workspaceState.update( 'remembrall.expanded', undefined );
         context.workspaceState.update( 'remembrall.expandedNodes', undefined );
 
