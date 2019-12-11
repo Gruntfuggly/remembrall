@@ -6,6 +6,7 @@ This was created as a simple TODO list organiser, but can be used to store any a
 
 *Note: Sync is done via a secret github gist. These are not public, not discoverable via github and are not searchable. However, they are not encrypted or protected in any other way. If someone discovers the URL for your gist or you share it with somebody, they will be able to view it's contents. **For this reason, it is recommended that you do not store private or sensitive information in your tree**.*
 
+
 ## Controls
 
 The following buttons are shown on the tree view title bar:
@@ -32,8 +33,15 @@ Creates a new item as a child of the selected item.
 **Set Icon**<br/>
 Change the icon shown in the tree to one from the [octicons](https://octicons.github.com/) set.
 
+**Set Icon Colour**<br/>
+Set the colour of the icon shown in the tree.
+
 **Mark As Done/Mark As New**<br/>
 Show the item in a smaller font if you want to show it as done, but not delete it yet.
+
+**Move To Top/Move To Bottom**<br/>
+Move the selected item to the top or bottom of it's list of siblings.
+
 
 ### Configuration
 
@@ -46,6 +54,9 @@ Show the view in the explorer. Set to false if you only want to use the dedicate
 **remembrall.confirmRemove** (default: true)<br/>
 Set to false to disable the remove confirmation prompt.
 
+**remembrall.defaultIcon**<br/>
+Set the default icon to one from the [octicons](https://octicons.github.com/). Used when when creating new items.
+
 **remembrall.syncEnabled** (default: false)<br/>
 Enable syncing via gist.
 
@@ -54,6 +65,7 @@ A github token to allow sync via gist.
 
 **remembrall.syncGistId**<br/>
 A github gist ID used to store shared settings.
+
 
 ## Syncing
 
@@ -70,25 +82,22 @@ You can use the same personal access token for each instance of Code that you wa
 
 If you have already set up sync from another instance of Code, once the token has been set, Remembrall should automatically find the existing gist and sync it. If this is the initial set up, a new gist will be created and populated with your current tree.
 
+
 ### Troubleshooting
 
 If you see `Request failed with status code 401` then your access token is not valid. Ensure that the token has the *Create gists* scope.
 
 If you see `Request failed with status code 404` then the gist can't be found. Try clearing the `remembrall.syncGistId` setting and refreshing the tree.
 
-## Commands
+
+## Other Commands
 
 **Create From Selection** will create a new item in the tree from any text you have selected in the current editor (or multiple items if you have multiple selections).
-
-**Mark As Done** will subsequently show the item in a smaller font
-
-**Mark As New** will revert the **Mark As Done** command
-
-**Move To Top** and **Move To Bottom** will move the selected item to the top or bottom of it's list of siblings.
 
 **Export** will generate a text file containing the tree contents in JSON format, which can be saved as required.
 
 **Import** will take the contents of the current editor and import them into the tree replacing any existing content.
+
 
 ## Installing
 
@@ -97,6 +106,7 @@ You can install the latest version of the extension via the Visual Studio Market
 ### Source Code
 
 The source code is available on GitHub [here](https://github.com/Gruntfuggly/remembrall).
+
 
 ## Credits
 
