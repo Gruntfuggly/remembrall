@@ -125,6 +125,11 @@
                     "command": "remembrall.setIcon",
                     "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/",
                     "group": "remembrall@6"
+                },
+                {
+                    "command": "remembrall.setIconColour",
+                    "when": "view =~ /remembrall/ && viewItem =~ /canSetIcon/",
+                    "group": "remembrall@6"
                 }
             ]
         },
@@ -286,11 +291,6 @@
                 "category": "Remembrall"
             },
             {
-                "command": "remembrall.setIcon",
-                "title": "Set Icon",
-                "category": "Remembrall"
-            },
-            {
                 "command": "remembrall.import",
                 "title": "Import",
                 "category": "Remembrall"
@@ -308,6 +308,16 @@
             {
                 "command": "remembrall.markAsNew",
                 "title": "Mark As New",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.setIcon",
+                "title": "Set Icon",
+                "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.setIconColour",
+                "title": "Set Icon Colour",
                 "category": "Remembrall"
             }
         ]

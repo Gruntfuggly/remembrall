@@ -3,6 +3,7 @@ var vscode = require( 'vscode' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 var os = require( 'os' );
+var icons = require( './icons' );
 var tree = require( './tree' );
 var storage = require( './storage' );
 
@@ -297,6 +298,26 @@ function activate( context )
         };
         treeAction( node, 'icon', prompt );
     }
+
+    function setIconColour( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showQuickPick( icons.validColours, { placeHolder: "Select a colour..." } ).then( function( colour )
+            {
+                if( colour !== undefined )
+                {
+                    node.iconColour = colour;
+                    updateTree();
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
     }
 
     function nodeFunction( method, node, argument )

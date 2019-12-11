@@ -24,6 +24,7 @@ function cleanNodes( nodes )
         var cleaned = {
             label: node.label,
             icon: node.icon,
+            iconColour: node.iconColour,
             uniqueId: node.uniqueId,
             done: node.done,
             nodes: [],

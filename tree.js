@@ -93,7 +93,7 @@ class RemembrallDataProvider
             treeItem.label = "";
         }
 
-        treeItem.iconPath = icons.getIcon( this._context, node.icon );
+        treeItem.iconPath = icons.getIcon( this._context, node.icon, node.iconColour );
 
         if( node.nodes && node.nodes.length > 0 )
         {
