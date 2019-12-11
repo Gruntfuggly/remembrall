@@ -145,11 +145,11 @@ function activate( context )
 
         if( node )
         {
-            vscode.window.showInputBox( prompt ).then( function( icon )
+            vscode.window.showInputBox( prompt ).then( function( response )
             {
-                if( icon )
+                if( response !== undefined )
                 {
-                    method.call( remembrallTree, node, icon );
+                    method.call( remembrallTree, node, response );
                     remembrallTree.refresh();
                     storage.triggerBackup( onLocalDataUpdated );
                 }

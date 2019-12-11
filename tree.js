@@ -82,7 +82,7 @@ class RemembrallDataProvider
             light: this._context.asAbsolutePath( path.join( "resources/icons", "light", "remembrall.svg" ) )
         };
 
-        if( octicons[ name ] )
+        if( name && octicons[ name ] )
         {
             if( this._context.globalStoragePath )
             {
@@ -135,10 +135,7 @@ class RemembrallDataProvider
             treeItem.label = "";
         }
 
-        if( node.icon )
-        {
-            treeItem.iconPath = this.getIcon( node.icon );
-        }
+        treeItem.iconPath = this.getIcon( node.icon );
 
         if( node.nodes && node.nodes.length > 0 )
         {
@@ -176,8 +173,8 @@ class RemembrallDataProvider
             id: nodeCounter++,
             uniqueId: utils.uuidv4(),
             label: item.label,
-            icon: 'remembrall',
             done: false,
+            icon: vscode.workspace.getConfiguration( 'remembrall' ).get( 'defaultIcon' ),
             nodes: []
         };
 
@@ -204,9 +201,9 @@ class RemembrallDataProvider
             id: nodeCounter++,
             uniqueId: utils.uuidv4(),
             label: item.label,
-            icon: 'remembrall',
             done: false,
             nodes: [],
+            icon: vscode.workspace.getConfiguration( 'remembrall' ).get( 'defaultIcon' ),
             parent: parentNode,
         };
 
@@ -227,7 +224,7 @@ class RemembrallDataProvider
 
     setIcon( item, icon )
     {
-        item.icon = icon;
+        item.icon = icon ? icon : undefined;
         this.storeNodes();
     }
 

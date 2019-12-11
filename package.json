@@ -146,6 +146,10 @@
                     "markdownDescription": "Set to false to disable the remove confirmation prompt",
                     "default": true
                 },
+                "remembrall.defaultIcon": {
+                    "type": "string",
+                    "markdownDescription": "Use this icon from the [octicons](https://octicons.github.com/) set when creating new items."
+                },
                 "remembrall.syncEnabled": {
                     "type": "boolean",
                     "description": "Enable syncing via gist",
