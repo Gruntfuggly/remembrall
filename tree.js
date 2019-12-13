@@ -283,7 +283,7 @@ class RemembrallDataProvider
         var located = this.locateNode( node );
         if( located.index !== undefined )
         {
-            this.swap( located.nodes, located.index, end === -1 ? 0 : located.nodes.length - 1 );
+            located.nodes.splice( end === -1 ? 0 : located.nodes.length - 1, 0, located.nodes.splice( located.index, 1 )[ 0 ] );
             this.storeNodes();
             this.refresh();
         }
