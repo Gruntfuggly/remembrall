@@ -137,14 +137,17 @@ function activate( context )
 
     function selectNode( node )
     {
+        // setTimeout( function()
+        // {
         if( remembrallViewExplorer && remembrallViewExplorer.visible === true )
         {
-            remembrallViewExplorer.reveal( node, { select: true } );
+            remembrallViewExplorer.reveal( node, { select: true, expand: 3 } );
         }
         if( remembrallView && remembrallView.visible === true )
         {
-            remembrallView.reveal( node, { select: true } );
+            remembrallView.reveal( node, { select: true, expand: 3 } );
         }
+        // }, 100 );
     }
 
     function treeAction( node, property, prompt )
@@ -189,7 +192,7 @@ function activate( context )
         {
             if( item )
             {
-                var node = remembrallTree.add( { label: item }, selectedNode(), function()
+                remembrallTree.add( { label: item }, selectedNode(), function( node )
                 {
                     storage.triggerBackup( onLocalDataUpdated );
                     selectNode( node );
@@ -208,7 +211,7 @@ function activate( context )
             {
                 if( item )
                 {
-                    var node = remembrallTree.addChild( { label: item }, parentNode, function()
+                    remembrallTree.addChild( { label: item }, parentNode, function( node )
                     {
                         storage.triggerBackup( onLocalDataUpdated );
                         selectNode( node );
@@ -326,8 +329,12 @@ function activate( context )
 
         if( node )
         {
-            method.call( remembrallTree, node, argument );
-            storage.triggerBackup( onLocalDataUpdated );
+            console.log( "Seklected ndoe:" + node.id );
+            method.call( remembrallTree, node, argument, function()
+            {
+                storage.triggerBackup( onLocalDataUpdated );
+                selectNode( node );
+            } );
         }
     }
 
@@ -337,6 +344,21 @@ function activate( context )
     function moveToBottom( node ) { nodeFunction( remembrallTree.moveTo, node, +1 ); }
     function makeChild( node ) { nodeFunction( remembrallTree.makeChild, node ); }
     function unparent( node ) { nodeFunction( remembrallTree.unparent, node ); }
+
+    function find()
+    {
+        vscode.window.showInputBox( { placeHolder: "Search tree..." } ).then( function( term )
+        {
+            if( term !== undefined )
+            {
+                remembrallTree.find( term, function( node )
+                {
+                    console.log( "Seklected ndoe:" + node.id );
+                    selectNode( node );
+                } );
+            }
+        } );
+    }
 
     function resetCache()
     {
@@ -456,6 +478,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIconColour', setIconColour ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', function( node ) { simpleTreeAction( node, 'done', true ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.find', find ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );

@@ -125,7 +125,7 @@ class RemembrallDataProvider
         return { nodes: nodes, index: index };
     }
 
-    add( item, selectedNode )
+    add( item, selectedNode, callback )
     {
         var itemNode = {
             id: nodeCounter++,
@@ -150,10 +150,13 @@ class RemembrallDataProvider
         this.resetOrder( this.itemNodes );
         this.storeNodes();
 
-        return itemNode;
+        if( callback )
+        {
+            callback( itemNode );
+        }
     }
 
-    addChild( item, parentNode )
+    addChild( item, parentNode, callback )
     {
         var itemNode = {
             id: nodeCounter++,
@@ -171,7 +174,10 @@ class RemembrallDataProvider
         this.resetOrder( this.itemNodes );
         this.storeNodes();
 
-        return itemNode;
+        if( callback )
+        {
+            callback( itemNode );
+        }
     }
 
     remove( node )
@@ -239,13 +245,17 @@ class RemembrallDataProvider
         }, this );
     }
 
-    refresh()
+    refresh( callback )
     {
         this.fetchNodes();
         this.rebuild();
         this.resetOrder( this.itemNodes );
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', this.itemNodes.length > 0 );
+        if( callback )
+        {
+            callback();
+        }
     }
 
     setExpanded( node, expanded )
@@ -267,25 +277,25 @@ class RemembrallDataProvider
         nodes[ secondIndex ] = temp;
     }
 
-    move( node, offset )
+    move( node, offset, callback )
     {
         var located = this.locateNode( node );
         if( located.index !== undefined )
         {
             this.swap( located.nodes, located.index, located.index + offset );
             this.storeNodes();
-            this.refresh();
+            this.refresh( callback );
         }
     }
 
-    moveTo( node, end )
+    moveTo( node, end, callback )
     {
         var located = this.locateNode( node );
         if( located.index !== undefined )
         {
             located.nodes.splice( end === -1 ? 0 : located.nodes.length - 1, 0, located.nodes.splice( located.index, 1 )[ 0 ] );
             this.storeNodes();
-            this.refresh();
+            this.refresh( callback );
         }
     }
 
@@ -318,6 +328,28 @@ class RemembrallDataProvider
             this.storeNodes();
             this.refresh();
         }
+    }
+
+    find( text, callback, nodes )
+    {
+        var found = false;
+
+        if( nodes === undefined )
+        {
+            nodes = this.itemNodes;
+        }
+        nodes.forEach( function( node )
+        {
+            if( !found && node.label.indexOf( text ) !== -1 )
+            {
+                callback( node );
+                found = true;
+            }
+            if( !found && node.nodes )
+            {
+                this.find( text, callback, node.nodes );
+            }
+        }, this );
     }
 }
 
