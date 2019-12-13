@@ -319,6 +319,11 @@
                 "command": "remembrall.setIconColour",
                 "title": "Set Icon Colour",
                 "category": "Remembrall"
+            },
+            {
+                "command": "remembrall.find",
+                "title": "Find",
+                "category": "Remembrall"
             }
         ]
     },
