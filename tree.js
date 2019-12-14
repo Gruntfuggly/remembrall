@@ -7,9 +7,15 @@ var nodeCounter = 1;
 
 class RemembrallDataProvider
 {
-    constructor( _context )
+    constructor( _context, onTreeRefreshed )
     {
         this._context = _context;
+        this.onTreeRefreshed = onTreeRefreshed;
+
+        this.collapsedNodes = 0;
+        this.expandedNodes = 0;
+        this.nodesToGet = 0;
+        this.expandNodes = false;
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -63,12 +69,14 @@ class RemembrallDataProvider
         {
             if( this.itemNodes.length > 0 )
             {
+                this.nodesToGet += this.itemNodes.length;
                 return this.itemNodes;
             }
             return [ { label: "Click + to add new items..." } ];
         }
         else if( node.nodes )
         {
+            this.nodesToGet += node.nodes.length;
             return node.nodes;
         }
     }
@@ -104,12 +112,26 @@ class RemembrallDataProvider
             }
             else
             {
-                treeItem.collapsibleState = ( this._context.workspaceState.get( 'remembrall.expanded' ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed );
+                treeItem.collapsibleState = this.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+            }
+
+            if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed )
+            {
+                this.collapsedNodes++;
+            }
+            if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Expanded )
+            {
+                this.expandedNodes++;
             }
         }
 
         treeItem.contextValue = node.contextValue;
 
+        this.nodesToGet--;
+        if( this.nodesToGet === 0 && this.onTreeRefreshed )
+        {
+            this.onTreeRefreshed();
+        }
         return treeItem;
     }
 
@@ -195,6 +217,9 @@ class RemembrallDataProvider
         if( nodes === undefined )
         {
             nodes = this.itemNodes;
+            this.collapsedNodes = 0;
+            this.expandedNodes = 0;
+            this.totalNodes = 0;
         }
         nodes.forEach( function( node )
         {
@@ -258,14 +283,21 @@ class RemembrallDataProvider
         }
     }
 
-    setExpanded( node, expanded )
+    setExpanded( node, expanded, callback )
     {
         expandedNodes[ node.uniqueId ] = expanded;
+        this.expandedNodes += expanded ? +1 : -1;
+        this.collapsedNodes += expanded ? -1 : +1;
         this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
+        if( callback )
+        {
+            callback();
+        }
     }
 
-    clearExpansionState()
+    setExpansionState( expandNodes )
     {
+        this.expandNodes = expandNodes;
         expandedNodes = {};
         this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
     }
@@ -350,6 +382,16 @@ class RemembrallDataProvider
                 this.find( text, callback, node.nodes );
             }
         }, this );
+    }
+
+    numberOfCollapsedNodes()
+    {
+        return this.collapsedNodes;
+    }
+
+    numberOfExpandedNodes()
+    {
+        return this.expandedNodes;
     }
 }
 

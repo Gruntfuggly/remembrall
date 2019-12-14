@@ -11,7 +11,7 @@ function activate( context )
 {
     var outputChannel;
 
-    var remembrallTree = new tree.RemembrallDataProvider( context );
+    var remembrallTree = new tree.RemembrallDataProvider( context, setContext );
 
     var remembrallViewExplorer = vscode.window.createTreeView( "remembrall-explorer", { treeDataProvider: remembrallTree } );
     var remembrallView = vscode.window.createTreeView( "remembrall", { treeDataProvider: remembrallTree } );
@@ -95,24 +95,22 @@ function activate( context )
     function setContext()
     {
         var showTree = true;
-        var expanded = context.workspaceState.get( 'remembrall.expanded' );
         var showInExplorer = vscode.workspace.getConfiguration( 'remembrall' ).get( 'showInExplorer' );
+
+        var expanded = ( remembrallTree.numberOfExpandedNodes() > remembrallTree.numberOfCollapsedNodes() )
 
         vscode.commands.executeCommand( 'setContext', 'remembrall-show-expand', !expanded );
         vscode.commands.executeCommand( 'setContext', 'remembrall-show-collapse', expanded );
         vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', showTree );
         vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', remembrallTree.hasContent() );
         vscode.commands.executeCommand( 'setContext', 'remembrall-in-explorer', showInExplorer );
+        vscode.commands.executeCommand( 'setContext', 'remembrall-in-explorer', showInExplorer );
     }
 
     function setExpansionState( expanded )
     {
-        context.workspaceState.update( 'remembrall.expanded', expanded ).then( function()
-        {
-            remembrallTree.clearExpansionState();
-            remembrallTree.refresh();
-            setContext();
-        } );
+        remembrallTree.setExpansionState( expanded );
+        remembrallTree.refresh( setContext );
     }
 
     function selectedNode()
@@ -370,7 +368,6 @@ function activate( context )
 
         purgeFolder( context.globalStoragePath );
 
-        context.workspaceState.update( 'remembrall.expanded', undefined );
         context.workspaceState.update( 'remembrall.expandedNodes', undefined );
 
         context.globalState.update( 'remembrall.lastUpdate', undefined );
@@ -475,10 +472,10 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.find', find ) );
 
-        context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
-        context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true ); } ) );
-        context.subscriptions.push( remembrallViewExplorer.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false ); } ) );
-        context.subscriptions.push( remembrallView.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false ); } ) );
+        context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );
+        context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );
+        context.subscriptions.push( remembrallViewExplorer.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false, setContext ); } ) );
+        context.subscriptions.push( remembrallView.onDidCollapseElement( function( e ) { remembrallTree.setExpanded( e.element, false, setContext ); } ) );
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
