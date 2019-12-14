@@ -362,26 +362,54 @@ class RemembrallDataProvider
         }
     }
 
-    find( text, callback, nodes )
+    find( text, instance, callback, notFound )
     {
-        var found = false;
+        var result = { found: false };
 
-        if( nodes === undefined )
+        this.doFind( result, text, instance, callback, this.itemNodes );
+
+        if( result.found === false )
         {
-            nodes = this.itemNodes;
+            if( result.firstInstance )
+            {
+                callback( result.firstInstance, true );
+            }
+            else
+            {
+                notFound();
+            }
         }
+    }
+
+    doFind( result, text, instance, callback, nodes )
+    {
+        var searchTerm = text.toLowerCase();
+
         nodes.forEach( function( node )
         {
-            if( !found && node.label.indexOf( text ) !== -1 )
+            if( !result.found && node.label.toLowerCase().indexOf( searchTerm ) !== -1 )
             {
-                callback( node );
-                found = true;
+                if( instance < 1 )
+                {
+                    callback( node, false );
+                    result.found = true;
+                }
+                else
+                {
+                    if( !result.firstInstance )
+                    {
+                        result.firstInstance = node;
+                    }
+                    instance--;
+                }
             }
-            if( !found && node.nodes )
+            if( !result.found && node.nodes )
             {
-                this.find( text, callback, node.nodes );
+                this.doFind( result, text, instance, callback, node.nodes );
             }
         }, this );
+
+        return result;
     }
 
     numberOfCollapsedNodes()

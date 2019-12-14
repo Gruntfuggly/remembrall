@@ -16,6 +16,9 @@ function activate( context )
     var remembrallViewExplorer = vscode.window.createTreeView( "remembrall-explorer", { treeDataProvider: remembrallTree } );
     var remembrallView = vscode.window.createTreeView( "remembrall", { treeDataProvider: remembrallTree } );
 
+    var findInstance = 0;
+    var findText = "";
+
     function extensionVersion()
     {
         var extensionPath = path.join( context.extensionPath, "package.json" );
@@ -137,11 +140,11 @@ function activate( context )
     {
         if( remembrallViewExplorer && remembrallViewExplorer.visible === true )
         {
-            remembrallViewExplorer.reveal( node, { select: true, expand: 3 } );
+            remembrallViewExplorer.reveal( node, { select: true, focus: true, expand: 3 } );
         }
         if( remembrallView && remembrallView.visible === true )
         {
-            remembrallView.reveal( node, { select: true, expand: 3 } );
+            remembrallView.reveal( node, { select: true, focus: true, expand: 3 } );
         }
     }
 
@@ -339,18 +342,46 @@ function activate( context )
     function makeChild( node ) { nodeFunction( remembrallTree.makeChild, node ); }
     function unparent( node ) { nodeFunction( remembrallTree.unparent, node ); }
 
+    function found( node, resetInstance )
+    {
+        selectNode( node );
+        if( resetInstance === true )
+        {
+            findInstance = 0;
+        }
+    }
+
+    function notFound()
+    {
+        vscode.window.showInformationMessage( "Not found: " + findText );
+        findInstance = 0;
+    }
+
     function find()
     {
-        vscode.window.showInputBox( { placeHolder: "Search tree..." } ).then( function( term )
+        vscode.window.showInputBox( { placeHolder: "Search tree...", value: findText } ).then( function( text )
         {
-            if( term !== undefined )
+            if( text !== undefined )
             {
-                remembrallTree.find( term, function( node )
+                findText = text;
+                var node = selectedNode();
+                if( node && node.label.toLowerCase().indexOf( findText.toLowerCase() ) !== -1 )
                 {
-                    selectNode( node );
-                } );
+                    findInstance++;
+                }
+                else
+                {
+                    findInstance = 0;
+                }
+                remembrallTree.find( findText, findInstance, found, notFound );
             }
         } );
+    }
+
+    function findNext()
+    {
+        findInstance++;
+        remembrallTree.find( findText, findInstance, found, notFound );
     }
 
     function resetCache()
@@ -471,6 +502,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', function( node ) { simpleTreeAction( node, 'done', true ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.find', find ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.findNext', findNext ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );

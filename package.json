@@ -50,19 +50,24 @@
                     "group": "navigation@1"
                 },
                 {
-                    "command": "remembrall.refresh",
+                    "command": "remembrall.find",
                     "when": "view =~ /remembrall/",
                     "group": "navigation@2"
                 },
                 {
+                    "command": "remembrall.refresh",
+                    "when": "view =~ /remembrall/",
+                    "group": "navigation@3"
+                },
+                {
                     "command": "remembrall.expand",
                     "when": "view =~ /remembrall/ && remembrall-show-expand && remembrall-tree-has-content",
-                    "group": "navigation@3"
+                    "group": "navigation@4"
                 },
                 {
                     "command": "remembrall.collapse",
                     "when": "view =~ /remembrall/ && remembrall-show-collapse && remembrall-tree-has-content",
-                    "group": "navigation@3"
+                    "group": "navigation@4"
                 }
             ],
             "view/item/context": [
@@ -276,6 +281,20 @@
                 }
             },
             {
+                "command": "remembrall.find",
+                "title": "Find",
+                "category": "Remembrall",
+                "icon": {
+                    "dark": "resources/icons/dark/search.svg",
+                    "light": "resources/icons/light/search.svg"
+                }
+            },
+            {
+                "command": "remembrall.findNext",
+                "title": "Find Next",
+                "category": "Remembrall"
+            },
+            {
                 "command": "remembrall.createChild",
                 "title": "Create New Child Item",
                 "category": "Remembrall"
@@ -318,11 +337,6 @@
             {
                 "command": "remembrall.setIconColour",
                 "title": "Set Icon Colour",
-                "category": "Remembrall"
-            },
-            {
-                "command": "remembrall.find",
-                "title": "Find",
                 "category": "Remembrall"
             }
         ]
