@@ -362,11 +362,11 @@ class RemembrallDataProvider
         }
     }
 
-    find( text, instance, callback, notFound )
+    find( text, callback, notFound, instance )
     {
         var result = { found: false };
 
-        this.doFind( result, text, instance, callback, this.itemNodes );
+        this.doFind( result, text, callback, instance, this.itemNodes );
 
         if( result.found === false )
         {
@@ -374,14 +374,14 @@ class RemembrallDataProvider
             {
                 callback( result.firstInstance, true );
             }
-            else
+            else if( notFound )
             {
                 notFound();
             }
         }
     }
 
-    doFind( result, text, instance, callback, nodes )
+    doFind( result, text, callback, instance, nodes )
     {
         var searchTerm = text.toLowerCase();
 
@@ -405,7 +405,7 @@ class RemembrallDataProvider
             }
             if( !result.found && node.nodes )
             {
-                this.doFind( result, text, instance, callback, node.nodes );
+                this.doFind( result, text, callback, instance, node.nodes );
             }
         }, this );
 
