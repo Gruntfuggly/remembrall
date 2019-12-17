@@ -10,6 +10,7 @@ var lastUpdate = new Date();
 var backupTimer;
 var queue = [];
 var version;
+var status;
 
 var OPEN_SETTINGS = 'Open Settings';
 var KEEP_LOCAL = 'Keep Local';
@@ -17,9 +18,10 @@ var OVERWRITE = 'Overwrite';
 var REPLACE_BACKUP = 'Replace Backup';
 var OVERWRITE_LOCAL = 'Overwrite Local';
 
-function initialize( globalState, currentVersion )
+function initialize( globalState, status, currentVersion )
 {
     state = globalState;
+    statusBarItem = status;
 
     initializeSync( currentVersion );
     var storedDate = globalState.get( 'remembrall.lastUpdate' );
@@ -66,12 +68,16 @@ function logAndCallback( error, callback )
     debug( error );
     if( callback )
     {
+        statusBarItem.hide();
         callback();
     }
 }
 
 function initializeSync( currentVersion, callback )
 {
+    statusBarItem.text = "Initialize sync...";
+    statusBarItem.show();
+
     version = currentVersion;
 
     var enabled = vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled', undefined );
@@ -132,6 +138,7 @@ function initializeSync( currentVersion, callback )
     }
     else if( callback )
     {
+        statusBarItem.hide();
         callback();
     }
 }
@@ -278,6 +285,9 @@ function sync( callback )
 
     if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
+        statusBarItem.text = "Sync...";
+        statusBarItem.show();
+
         debug( "Debug: sync" );
 
         queue.push( enqueue( doSync, this, [ callback ] ) );
@@ -416,6 +426,9 @@ function triggerBackup( callback )
 
     if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
+        statusBarItem.text = "Backup...";
+        statusBarItem.show();
+
         debug( "Info: Set time of last update: " + lastUpdate );
         debug( "Info: Backing up in 1 second..." );
         clearTimeout( backupTimer );
