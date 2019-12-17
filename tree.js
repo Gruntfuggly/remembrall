@@ -72,7 +72,7 @@ class RemembrallDataProvider
                 this.nodesToGet += this.itemNodes.length;
                 return this.itemNodes;
             }
-            return [ { label: "Click + to add new items..." } ];
+            return undefined;
         }
         else if( node.nodes )
         {

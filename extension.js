@@ -55,7 +55,7 @@ function activate( context )
 
     function onLocalDataUpdated()
     {
-        remembrallTree.refresh();
+        remembrallTree.refresh( setContext );
     }
 
     function reinitializeSync()
@@ -109,6 +109,10 @@ function activate( context )
         vscode.commands.executeCommand( 'setContext', 'remembrall-tree-has-content', remembrallTree.hasContent() );
         vscode.commands.executeCommand( 'setContext', 'remembrall-in-explorer', showInExplorer );
         vscode.commands.executeCommand( 'setContext', 'remembrall-in-explorer', showInExplorer );
+
+        var message = remembrallTree.hasContent() ? "" : "Click the + button on the title bar to add new items...";
+        remembrallView.message = message;
+        remembrallViewExplorer.message = message;
     }
 
     function setExpansionState( expanded )
@@ -278,7 +282,8 @@ function activate( context )
             {
                 remembrallTree.remove( node );
                 remembrallTree.refresh();
-                storage.triggerBackup( onLocalDataUpdated );
+                storage.triggerBackup();
+                onLocalDataUpdated();
             }
 
             if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true )
@@ -452,8 +457,12 @@ function activate( context )
                         {
                             if( Array.isArray( nodeData ) )
                             {
-                                context.globalState.update( 'remembrall.items', JSON.stringify( nodeData ) );
-                                onLocalDataUpdated();
+                                context.globalState.update( 'remembrall.items', JSON.stringify( nodeData ) ).then( function()
+                                {
+                                    remembrallTree.fetchNodes();
+                                    storage.triggerBackup();
+                                    onLocalDataUpdated();
+                                } );
                             }
                             else
                             {
