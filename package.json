@@ -1,7 +1,7 @@
 {
     "name": "remembrall",
     "displayName": "Remembrall",
-    "description": "A simple extension that provides a syncable todo list",
+    "description": "A simple extension that provides a reorderable, syncable todo list",
     "icon": "resources/remembrall.png",
     "version": "0.0.1",
     "license": "MIT",

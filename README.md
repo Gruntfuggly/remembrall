@@ -1,10 +1,12 @@
 # Remembrall
 
+A simple extension that provides a reorderable, syncable TODO list.
+
 This was created as a simple TODO list organiser, but can be used to store any arbitrary text in a tree. The contents of the tree can be optionally synced with other instances of Code using a github gist.
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/screenshot.png">
 
-*Note: Sync is done via a secret github gist. These are not public, not discoverable via github and are not searchable. However, they are not encrypted or protected in any other way. If someone discovers the URL for your gist or you share it with somebody, they will be able to view it's contents. **For this reason, it is recommended that you do not store private or sensitive information in your tree**.*
+*Note: Sync is done via a secret github gist. These are not public, not discoverable via github, and are not searchable. However, they are not encrypted or protected in any other way. If someone discovers the URL for your gist or you share it with somebody, they will be able to view it's contents. **For this reason, it is recommended that you do not store private or sensitive information in your tree**.*
 
 
 ## Controls
@@ -12,6 +14,7 @@ This was created as a simple TODO list organiser, but can be used to store any a
 The following buttons are shown on the tree view title bar:
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.svg?sanitize=true" height="16px" align="center"> Add a new item to the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.svg?sanitize=true" height="16px" align="center"> Search the tree<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/refresh.svg?sanitize=true" height="16px" align="center"> Refresh the tree<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/expand.svg?sanitize=true" height="16px" align="center"> Expand all the items in the tree<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/collapse.svg?sanitize=true" height="16px" align="center"> Collapse all the items in the tree<br/>
@@ -98,6 +101,7 @@ If you see `Request failed with status code 404` then the gist can't be found. T
 
 **Import** will take the contents of the current editor and import them into the tree replacing any existing content.
 
+**Find Next** can be used to find the next occurrence when searching the tree.
 
 ## Installing
 
