@@ -6,6 +6,7 @@ var os = require( 'os' );
 var icons = require( './icons' );
 var tree = require( './tree' );
 var storage = require( './storage' );
+var octiconData = require( 'octicons/build/data.json' );
 
 function activate( context )
 {
@@ -169,6 +170,27 @@ function activate( context )
         }
     }
 
+    function selectionTreeAction( node, choices, property, prompt )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showQuickPick( choices, prompt ).then( function( response )
+            {
+                if( response !== undefined )
+                {
+                    node[ property ] = response;
+                    updateTree();
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
     function simpleTreeAction( node, property, value )
     {
         node = node ? node : selectedNode();
@@ -292,33 +314,12 @@ function activate( context )
 
     function setIcon( node )
     {
-        var prompt =
-        {
-            placeHolder: "Enter an octicon name...",
-            prompt: "For available icons, see: https://octicons.github.com/ "
-        };
-        treeAction( node, 'icon', prompt );
+        selectionTreeAction( node, Object.keys( octiconData ).sort(), 'icon', { placeHolder: "Select an octicon..." } );
     }
 
     function setIconColour( node )
     {
-        node = node ? node : selectedNode();
-
-        if( node )
-        {
-            vscode.window.showQuickPick( icons.validColours, { placeHolder: "Select a colour..." } ).then( function( colour )
-            {
-                if( colour !== undefined )
-                {
-                    node.iconColour = colour;
-                    updateTree();
-                }
-            } );
-        }
-        else
-        {
-            vscode.window.showInformationMessage( "Please select an item in the list" );
-        }
+        selectionTreeAction( node, icons.validColours, 'iconColour', { placeHolder: "Select a colour..." } );
     }
 
     function nodeFunction( method, node, argument )
