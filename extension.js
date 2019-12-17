@@ -74,6 +74,7 @@ function activate( context )
         remembrallTree.storeNodes();
         remembrallTree.refresh();
         storage.triggerBackup( onLocalDataUpdated );
+        onLocalDataUpdated();
     }
 
     function refresh()
@@ -219,6 +220,7 @@ function activate( context )
                 remembrallTree.add( { label: item }, selectedNode(), function( node )
                 {
                     storage.triggerBackup( onLocalDataUpdated );
+                    onLocalDataUpdated();
                     selectNode( node );
                 } );
             }
@@ -238,6 +240,7 @@ function activate( context )
                     remembrallTree.addChild( { label: item }, parentNode, function( node )
                     {
                         storage.triggerBackup( onLocalDataUpdated );
+                        onLocalDataUpdated();
                         selectNode( node );
                     } );
                 }
@@ -268,6 +271,7 @@ function activate( context )
                 remembrallTree.refresh();
                 selectNode( newNode );
                 storage.triggerBackup( onLocalDataUpdated );
+                onLocalDataUpdated();
             } );
         }
     }
@@ -282,7 +286,7 @@ function activate( context )
             {
                 remembrallTree.remove( node );
                 remembrallTree.refresh();
-                storage.triggerBackup();
+                storage.triggerBackup( onLocalDataUpdated );
                 onLocalDataUpdated();
             }
 
@@ -336,6 +340,7 @@ function activate( context )
             method.call( remembrallTree, node, argument, function()
             {
                 storage.triggerBackup( onLocalDataUpdated );
+                onLocalDataUpdated();
                 remembrallTree.find( node.label, selectNode );
             } );
         }
@@ -460,7 +465,7 @@ function activate( context )
                                 context.globalState.update( 'remembrall.items', JSON.stringify( nodeData ) ).then( function()
                                 {
                                     remembrallTree.fetchNodes();
-                                    storage.triggerBackup();
+                                    storage.triggerBackup( onLocalDataUpdated );
                                     onLocalDataUpdated();
                                 } );
                             }
