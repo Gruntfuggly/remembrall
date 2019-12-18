@@ -166,27 +166,6 @@ function activate( context )
         }
     }
 
-    function treeAction( node, property, prompt )
-    {
-        node = node ? node : selectedNode();
-
-        if( node )
-        {
-            vscode.window.showInputBox( prompt ).then( function( response )
-            {
-                if( response !== undefined )
-                {
-                    node[ property ] = response;
-                    updateTree();
-                }
-            } );
-        }
-        else
-        {
-            vscode.window.showInformationMessage( "Please select an item in the list" );
-        }
-    }
-
     function selectionTreeAction( node, choices, property, prompt )
     {
         node = node ? node : selectedNode();
@@ -352,7 +331,23 @@ function activate( context )
 
     function edit( node )
     {
-        treeAction( node, 'label', { value: node.label } );
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            vscode.window.showInputBox( { value: node.label } ).then( function( response )
+            {
+                if( response !== undefined )
+                {
+                    node[ property ] = response;
+                    updateTree();
+                }
+            } );
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
     }
 
     function setIcon( node )
