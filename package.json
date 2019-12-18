@@ -160,6 +160,11 @@
                     "type": "string",
                     "markdownDescription": "Use this icon from the [octicons](https://octicons.github.com/) set when creating new items."
                 },
+                "remembrall.moveDoneItemsToBottom": {
+                    "type": "boolean",
+                    "markdownDescription": "When marking an item as done, move it to the bottom of the list.",
+                    "default": true
+                },
                 "remembrall.syncEnabled": {
                     "type": "boolean",
                     "description": "Enable syncing via gist",

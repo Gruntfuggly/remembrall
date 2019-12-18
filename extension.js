@@ -223,6 +223,28 @@ function activate( context )
         }
     }
 
+    function markAsDone( node )
+    {
+        node = node ? node : selectedNode();
+
+        if( node )
+        {
+            node.done = true;
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'moveDoneItemsToBottom' ) === true )
+            {
+                moveToBottom( node );
+            }
+            else
+            {
+                updateTree();
+            }
+        }
+        else
+        {
+            vscode.window.showInformationMessage( "Please select an item in the list" );
+        }
+    }
+
     function create()
     {
         vscode.window.showInputBox( { placeHolder: "Enter something to remember..." } ).then( function( item )
@@ -525,7 +547,7 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.import', importTree ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIcon', setIcon ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIconColour', setIconColour ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', function( node ) { simpleTreeAction( node, 'done', true ); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', markAsDone ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.find', find ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.findNext', findNext ) );
