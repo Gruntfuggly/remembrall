@@ -191,7 +191,7 @@ class RemembrallDataProvider
             parent: parentNode,
         };
 
-        parentNode.nodes.push( itemNode );
+        parentNode.nodes.unshift( itemNode );
 
         this.rebuild();
         this.resetOrder( this.itemNodes );
