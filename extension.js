@@ -425,8 +425,11 @@ function activate( context )
 
     function findNext()
     {
-        findInstance++;
-        remembrallTree.find( findText, findInstance, found, notFound );
+        if( findText.trim().length > 0 )
+        {
+            findInstance++;
+            remembrallTree.find( findText, findInstance, found, notFound );
+        }
     }
 
     function resetCache()
