@@ -11,6 +11,8 @@ var octiconData = require( 'octicons/build/data.json' );
 function activate( context )
 {
     var outputChannel;
+    var lastClickedNode;
+    var doubleClickTimer;
 
     var remembrallTree = new tree.RemembrallDataProvider( context, setContext );
 
@@ -187,13 +189,13 @@ function activate( context )
         }
     }
 
-    function simpleTreeAction( node, property, value )
+    function markAsNew( node )
     {
         node = node ? node : selectedNode();
 
         if( node )
         {
-            node[ property ] = value;
+            node.done = false;
             updateTree();
         }
         else
@@ -209,7 +211,8 @@ function activate( context )
         if( node )
         {
             node.done = true;
-            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'moveDoneItemsToBottom' ) === true )
+            var located = remembrallTree.locateNode( node );
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'moveDoneItemsToBottom' ) === true && located.index !== located.nodes.length - 1 )
             {
                 moveToBottom( node );
             }
@@ -427,6 +430,44 @@ function activate( context )
         }
     }
 
+    function selected( node )
+    {
+        if( doubleClickTimer && node.id === lastClickedNode.id )
+        {
+            var doubleClickAction = vscode.workspace.getConfiguration( 'remembrall' ).get( 'doubleClickAction' );
+
+            debug( "Info: item double clicked - action: " + doubleClickAction );
+
+            switch( doubleClickAction )
+            {
+                case 'Edit':
+                    edit( node );
+                    break;
+                case 'Toggle Mark As Done':
+                    if( node.done )
+                    {
+                        markAsNew( node );
+                    }
+                    else
+                    {
+                        markAsDone( node );
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            lastClickedNode = node;
+            doubleClickTimer = setTimeout( function()
+            {
+                doubleClickTimer = undefined;
+                lastClickedNode = undefined;
+            }, 500 );
+        }
+    }
+
     function resetCache()
     {
         function purgeFolder( folder )
@@ -546,9 +587,10 @@ function activate( context )
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIcon', setIcon ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.setIconColour', setIconColour ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsDone', markAsDone ) );
-        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', function( node ) { simpleTreeAction( node, 'done', false ); } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.markAsNew', markAsNew ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.find', find ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.findNext', findNext ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.onSelected', selected ) );
 
         context.subscriptions.push( remembrallViewExplorer.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );
         context.subscriptions.push( remembrallView.onDidExpandElement( function( e ) { remembrallTree.setExpanded( e.element, true, setContext ); } ) );
@@ -583,9 +625,17 @@ function activate( context )
                     remembrallTree.rebuild();
                     remembrallTree.refresh();
                 }
+                else if(
+                    e.affectsConfiguration( 'remembrall.confirmRemove' ) ||
+                    e.affectsConfiguration( 'remembrall.defaultIcon' ) ||
+                    e.affectsConfiguration( 'remembrall.moveDoneItemsToBottom' ) ||
+                    e.affectsConfiguration( 'remembrall.doubleClickAction' ) )
+                {
+                    debug( "Info: settings updated" );
+                }
                 else
                 {
-                    console.log( "Error: Unexpected setting changed" );
+                    debug( "Error: Unexpected setting changed" );
                 }
             }
         } ) );

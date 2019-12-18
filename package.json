@@ -170,6 +170,21 @@
                     "markdownDescription": "When marking an item as done, move it to the bottom of the list.",
                     "default": true
                 },
+                "remembrall.doubleClickAction": {
+                    "type": "string",
+                    "enum": [
+                        "Edit",
+                        "Toggle Mark As Done",
+                        "Nothing"
+                    ],
+                    "markdownDescription": "What action to take when double clicking items in the tree.",
+                    "markdownEnumDescriptions": [
+                        "Edit the item text",
+                        "Toggle the item from new to done and vice versa",
+                        "Do Nothing"
+                    ],
+                    "default": "Nothing"
+                },
                 "remembrall.syncEnabled": {
                     "type": "boolean",
                     "description": "Enable syncing via gist",

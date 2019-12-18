@@ -133,6 +133,8 @@ class RemembrallDataProvider
 
         treeItem.contextValue = node.contextValue;
 
+        treeItem.command = { command: "remembrall.onSelected", arguments: [ node ] };
+
         this.nodesToGet--;
         if( this.nodesToGet === 0 && this.onTreeRefreshed )
         {
