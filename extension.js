@@ -583,9 +583,14 @@ function activate( context )
                 {
                     storage.resetId( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncGistId' ), refresh );
                 }
+                else if( e.affectsConfiguration( 'remembrall.showCollapsedItemCounts' ) )
+                {
+                    remembrallTree.rebuild();
+                    remembrallTree.refresh();
+                }
                 else
                 {
-                    debug( "Error: Unexpected setting changed" );
+                    console.log( "Error: Unexpected setting changed" );
                 }
             }
         } ) );
