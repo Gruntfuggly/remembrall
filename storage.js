@@ -75,7 +75,7 @@ function logAndCallback( error, callback )
 
 function initializeSync( currentVersion, callback )
 {
-    statusBarItem.text = "Initialize sync...";
+    statusBarItem.text = "$(plug)";
     statusBarItem.show();
 
     version = currentVersion;
@@ -163,6 +163,10 @@ function processQueue()
     {
         ( queue.shift() )();
     }
+    else
+    {
+        statusBarItem.hide();
+    }
 }
 
 function doUpdate( data, callback )
@@ -201,6 +205,9 @@ function sync( callback )
 {
     function doSync( callback )
     {
+        statusBarItem.text = "$(cloud-download)";
+        statusBarItem.show();
+
         debug( "Debug: doSync" );
 
         if( checkSetting( 'syncToken', callback ) && checkSetting( 'syncGistId', callback ) && gistore.token )
@@ -285,9 +292,6 @@ function sync( callback )
 
     if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
-        statusBarItem.text = "Sync...";
-        statusBarItem.show();
-
         debug( "Debug: sync" );
 
         queue.push( enqueue( doSync, this, [ callback ] ) );
@@ -337,7 +341,11 @@ function backup( callback )
 
     function doBackup()
     {
+        statusBarItem.text = "$(cloud-upload)";
+        statusBarItem.show();
+
         debug( "Debug: doBackup" );
+
         if( checkSetting( 'syncToken', callback ) && checkSetting( 'syncGistId', callback ) && gistore.token )
         {
             gistore.sync().then( function( data )
@@ -407,9 +415,6 @@ function backup( callback )
 
     if( active === true && vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
-        statusBarItem.text = "Backup...";
-        statusBarItem.show();
-
         debug( "Debug: backup" );
 
         queue.push( enqueue( doBackup, this, [] ) );
