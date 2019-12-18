@@ -91,14 +91,9 @@ class RemembrallDataProvider
 
         treeItem.id = nodeCounter++;
         treeItem.tooltip = node.tooltip;
+        treeItem.label = node.label;
 
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
-
-        if( node.done )
-        {
-            treeItem.description = node.label;
-            treeItem.label = "";
-        }
 
         treeItem.iconPath = icons.getIcon( this._context, node.icon, node.iconColour );
 
@@ -119,11 +114,21 @@ class RemembrallDataProvider
             if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed )
             {
                 this.collapsedNodes++;
+                if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'showCollapsedItemCounts' ) === true )
+                {
+                    treeItem.label += " (" + node.nodes.length + ")";
+                }
             }
             if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Expanded )
             {
                 this.expandedNodes++;
             }
+        }
+
+        if( node.done )
+        {
+            treeItem.description = treeItem.label;
+            treeItem.label = "";
         }
 
         treeItem.contextValue = node.contextValue;
@@ -290,9 +295,11 @@ class RemembrallDataProvider
         this.expandedNodes += expanded ? +1 : -1;
         this.collapsedNodes += expanded ? -1 : +1;
         this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
-        if( callback )
+
+        if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'showCollapsedItemCounts' ) === true )
         {
-            callback();
+            this.rebuild();
+            this.refresh( callback );
         }
     }
 

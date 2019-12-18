@@ -151,6 +151,11 @@
                     "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
                     "default": true
                 },
+                "remembrall.showCollapsedItemCounts": {
+                    "type": "boolean",
+                    "markdownDescription": "If true, collapsed items show a count of the number of children",
+                    "default": true
+                },
                 "remembrall.confirmRemove": {
                     "type": "boolean",
                     "markdownDescription": "Set to false to disable the remove confirmation prompt",
