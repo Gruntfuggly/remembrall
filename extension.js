@@ -125,8 +125,13 @@ function activate( context )
 
     function setExpansionState( expanded )
     {
-        remembrallTree.setExpansionState( expanded );
-        remembrallTree.refresh( setContext );
+        context.workspaceState.update( 'remembrall.expandAll', expanded ).then( function()
+        {
+            remembrallTree.clearExpansionState( function()
+            {
+                remembrallTree.refresh( setContext );
+            } );
+        } );
     }
 
     function selectedNode()
@@ -417,6 +422,7 @@ function activate( context )
 
         purgeFolder( context.globalStoragePath );
 
+        context.workspaceState.update( 'remembrall.expandAll', undefined );
         context.workspaceState.update( 'remembrall.expandedNodes', undefined );
 
         context.globalState.update( 'remembrall.lastUpdate', undefined );

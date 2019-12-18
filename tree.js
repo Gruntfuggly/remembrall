@@ -15,7 +15,6 @@ class RemembrallDataProvider
         this.collapsedNodes = 0;
         this.expandedNodes = 0;
         this.nodesToGet = 0;
-        this.expandNodes = false;
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -108,11 +107,13 @@ class RemembrallDataProvider
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             if( expandedNodes[ node.uniqueId ] !== undefined )
             {
-                treeItem.collapsibleState = ( expandedNodes[ node.uniqueId ] === true ) ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+                treeItem.collapsibleState = ( expandedNodes[ node.uniqueId ] === true ) ?
+                    vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
             else
             {
-                treeItem.collapsibleState = this.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+                treeItem.collapsibleState = this._context.workspaceState.get( 'remembrall.expandAll' ) ?
+                    vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
 
             if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Collapsed )
@@ -295,11 +296,13 @@ class RemembrallDataProvider
         }
     }
 
-    setExpansionState( expandNodes )
+    clearExpansionState( callback )
     {
-        this.expandNodes = expandNodes;
         expandedNodes = {};
-        this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
+        this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes ).then( function()
+        {
+            callback();
+        } );
     }
 
     swap( nodes, firstIndex, secondIndex )
