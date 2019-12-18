@@ -293,15 +293,18 @@ class RemembrallDataProvider
 
     setExpanded( node, expanded, callback )
     {
-        expandedNodes[ node.uniqueId ] = expanded;
-        this.expandedNodes += expanded ? +1 : -1;
-        this.collapsedNodes += expanded ? -1 : +1;
-        this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
-
-        if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'showCollapsedItemCounts' ) === true )
+        if( node.nodes.length > 0 )
         {
-            this.rebuild();
-            this.refresh( callback );
+            expandedNodes[ node.uniqueId ] = expanded;
+            this.expandedNodes += expanded ? +1 : -1;
+            this.collapsedNodes += expanded ? -1 : +1;
+            this._context.workspaceState.update( 'remembrall.expandedNodes', expandedNodes );
+
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'showCollapsedItemCounts' ) === true )
+            {
+                this.rebuild();
+                this.refresh( callback );
+            }
         }
     }
 
