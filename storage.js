@@ -331,6 +331,8 @@ function backup( callback )
             triggerBackup();
             processQueue();
         } );
+
+        statusBarItem.hide();
     }
 
     function doBackup()
@@ -405,6 +407,9 @@ function backup( callback )
 
     if( active === true && vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
+        statusBarItem.text = "Backup...";
+        statusBarItem.show();
+
         debug( "Debug: backup" );
 
         queue.push( enqueue( doBackup, this, [] ) );
@@ -426,9 +431,6 @@ function triggerBackup( callback )
 
     if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'syncEnabled' ) === true )
     {
-        statusBarItem.text = "Backup...";
-        statusBarItem.show();
-
         debug( "Info: Set time of last update: " + lastUpdate );
         debug( "Info: Backing up in 1 second..." );
         clearTimeout( backupTimer );
