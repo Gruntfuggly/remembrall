@@ -14,8 +14,8 @@ function activate( context )
 
     var remembrallTree = new tree.RemembrallDataProvider( context, setContext );
 
-    var remembrallViewExplorer = vscode.window.createTreeView( "remembrall-explorer", { treeDataProvider: remembrallTree } );
-    var remembrallView = vscode.window.createTreeView( "remembrall", { treeDataProvider: remembrallTree } );
+    var remembrallViewExplorer = vscode.window.createTreeView( "remembrall-view-explorer", { treeDataProvider: remembrallTree } );
+    var remembrallView = vscode.window.createTreeView( "remembrall-view", { treeDataProvider: remembrallTree } );
 
     var status = vscode.window.createStatusBarItem( vscode.StatusBarAlignment.Left, 0 );
 
@@ -498,8 +498,6 @@ function activate( context )
         resetOutputChannel();
 
         storage.initialize( context.globalState, status, extensionVersion() );
-
-        vscode.window.registerTreeDataProvider( 'remembrall', remembrallTree );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.refresh', refresh ) );
         context.subscriptions.push( vscode.commands.registerCommand( 'remembrall.expand', function() { setExpansionState( true ); } ) );

@@ -21,7 +21,7 @@
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "remembrall",
+                    "id": "remembrall-container",
                     "title": "Remembrall",
                     "icon": "resources/remembrall-container.svg"
                 }
@@ -30,14 +30,14 @@
         "views": {
             "explorer": [
                 {
-                    "id": "remembrall-explorer",
+                    "id": "remembrall-view-explorer",
                     "name": "Remembrall",
                     "when": "remembrall-in-explorer"
                 }
             ],
-            "remembrall": [
+            "remembrall-container": [
                 {
-                    "id": "remembrall",
+                    "id": "remembrall-view",
                     "name": "Remembrall"
                 }
             ]
