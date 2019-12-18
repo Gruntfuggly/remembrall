@@ -370,13 +370,16 @@ class RemembrallDataProvider
 
         if( result.found === false )
         {
-            if( result.firstInstance )
+            if( callback )
             {
-                callback( result.firstInstance, true );
-            }
-            else if( notFound )
-            {
-                notFound();
+                if( result.firstInstance )
+                {
+                    callback( result.firstInstance, true );
+                }
+                else if( notFound )
+                {
+                    notFound();
+                }
             }
         }
     }
