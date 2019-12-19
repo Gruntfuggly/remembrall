@@ -146,6 +146,11 @@
                     "markdownDescription": "Create a debug channel in the output view",
                     "default": false
                 },
+                "remembrall.viewTitle": {
+                    "type": "string",
+                    "markdownDescription": "Set the title displayed above the tree",
+                    "default": "Remembrall"
+                },
                 "remembrall.showInExplorer": {
                     "type": "boolean",
                     "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",

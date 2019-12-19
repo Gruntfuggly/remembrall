@@ -123,6 +123,10 @@ function activate( context )
         var message = remembrallTree.hasContent() ? "" : "Click the + button on the title bar to add new items...";
         remembrallView.message = message;
         remembrallViewExplorer.message = message;
+
+        var title = vscode.workspace.getConfiguration( 'remembrall' ).get( 'viewTitle' );
+        remembrallView.title = title;
+        remembrallViewExplorer.title = title;
     }
 
     function setExpansionState( expanded )
@@ -611,7 +615,8 @@ function activate( context )
                 {
                     resetOutputChannel();
                 }
-                else if( e.affectsConfiguration( 'remembrall.showInExplorer' ) )
+                else if( e.affectsConfiguration( 'remembrall.showInExplorer' ) ||
+                    e.affectsConfiguration( 'remembrall.viewTitle' ) )
                 {
                     setContext();
                 }
