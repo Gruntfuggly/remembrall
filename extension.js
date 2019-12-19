@@ -13,6 +13,7 @@ function activate( context )
     var outputChannel;
     var lastClickedNode;
     var doubleClickTimer;
+    var pendingSelection;
 
     var remembrallTree = new tree.RemembrallDataProvider( context, setContext );
 
@@ -127,6 +128,12 @@ function activate( context )
         var title = vscode.workspace.getConfiguration( 'remembrall' ).get( 'viewTitle' );
         remembrallView.title = title;
         remembrallViewExplorer.title = title;
+
+        if( pendingSelection )
+        {
+            remembrallTree.find( pendingSelection.label, selectNode );
+            pendingSelection = undefined;
+        }
     }
 
     function setExpansionState( expanded )
@@ -184,6 +191,7 @@ function activate( context )
                 {
                     node[ property ] = response;
                     updateTree();
+                    debug( "Info: Updated item: " + property + " = " + response );
                 }
             } );
         }
@@ -231,18 +239,23 @@ function activate( context )
         }
     }
 
+    function onItemCreated( node )
+    {
+        debug( "Info: Created item: " + node.label );
+
+        pendingSelection = node;
+        remembrallTree.refresh();
+
+        storage.triggerBackup( onLocalDataUpdated );
+    }
+
     function create()
     {
         vscode.window.showInputBox( { placeHolder: "Enter something to remember..." } ).then( function( item )
         {
             if( item )
             {
-                remembrallTree.add( { label: item }, selectedNode(), function( node )
-                {
-                    storage.triggerBackup( onLocalDataUpdated );
-                    onLocalDataUpdated();
-                    selectNode( node );
-                } );
+                remembrallTree.add( { label: item }, selectedNode(), onItemCreated );
             }
         } );
     }
@@ -257,12 +270,7 @@ function activate( context )
             {
                 if( item )
                 {
-                    remembrallTree.addChild( { label: item }, parentNode, function( node )
-                    {
-                        storage.triggerBackup( onLocalDataUpdated );
-                        onLocalDataUpdated();
-                        selectNode( node );
-                    } );
+                    remembrallTree.addChild( { label: item }, parentNode, onItemCreated );
                 }
             } );
         }
@@ -278,20 +286,36 @@ function activate( context )
         if( editor && editor.selections )
         {
             var currentNode = selectedNode();
-            var newNode;
-            editor.selections.reverse().map( function( selection )
+
+            var numberOfItems = editor.selections.length;
+
+            editor.selections.reverse().map( function( selection, index )
             {
                 if( selection.start != selection.end )
                 {
                     var document = editor.document;
                     var content = document.getText().substring( document.offsetAt( selection.start ), document.offsetAt( selection.end ) );
 
-                    newNode = remembrallTree.add( { label: content }, currentNode );
+                    if( index === numberOfItems - 1 )
+                    {
+                        remembrallTree.add( { label: content }, currentNode, function( newNode )
+                        {
+                            debug( "Info: Created item from selection: " + newNode.label );
+
+                            remembrallTree.refresh();
+                            remembrallTree.find( newNode.label, selectNode );
+                            storage.triggerBackup( onLocalDataUpdated );
+                            onLocalDataUpdated();
+                        } );
+                    }
+                    else
+                    {
+                        remembrallTree.add( { label: content }, currentNode, function( newNode )
+                        {
+                            debug( "Info: Created item from selection: " + newNode.label );
+                        } );
+                    }
                 }
-                remembrallTree.refresh();
-                selectNode( newNode );
-                storage.triggerBackup( onLocalDataUpdated );
-                onLocalDataUpdated();
             } );
         }
     }
@@ -300,16 +324,17 @@ function activate( context )
     {
         node = node ? node : selectedNode();
 
+        function removeNode()
+        {
+            debug( "Info: Removed item: " + node.label );
+            remembrallTree.remove( node );
+            remembrallTree.refresh();
+            storage.triggerBackup( onLocalDataUpdated );
+            onLocalDataUpdated();
+        }
+
         if( node )
         {
-            function removeNode()
-            {
-                remembrallTree.remove( node );
-                remembrallTree.refresh();
-                storage.triggerBackup( onLocalDataUpdated );
-                onLocalDataUpdated();
-            }
-
             if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true )
             {
                 var prompt = "Are you sure you want to remove this item";
@@ -346,7 +371,8 @@ function activate( context )
             {
                 if( response !== undefined )
                 {
-                    node[ property ] = response;
+                    debug( "Info: Edited item: " + node.label + " -> " + response );
+                    node.label = response;
                     updateTree();
                 }
             } );
@@ -391,6 +417,7 @@ function activate( context )
 
     function found( node, resetInstance )
     {
+        debug( "Info: Found item" );
         selectNode( node );
         if( resetInstance === true )
         {
@@ -400,6 +427,7 @@ function activate( context )
 
     function notFound()
     {
+        debug( "Info: Not found" );
         vscode.window.showInformationMessage( "Not found: " + findText );
         findInstance = 0;
     }
@@ -420,7 +448,8 @@ function activate( context )
                 {
                     findInstance = 0;
                 }
-                remembrallTree.find( findText, findInstance, found, notFound );
+                debug( "Info: Searching for " + findText );
+                remembrallTree.find( findText, found, notFound, findInstance );
             }
         } );
     }
@@ -430,17 +459,18 @@ function activate( context )
         if( findText.trim().length > 0 )
         {
             findInstance++;
-            remembrallTree.find( findText, findInstance, found, notFound );
+            remembrallTree.find( findText, found, notFound, findInstance );
         }
     }
 
     function selected( node )
     {
+        // return;
         if( doubleClickTimer && node.id === lastClickedNode.id )
         {
             var doubleClickAction = vscode.workspace.getConfiguration( 'remembrall' ).get( 'doubleClickAction' );
 
-            debug( "Info: item double clicked - action: " + doubleClickAction );
+            debug( "Info: Item double clicked - action: " + doubleClickAction );
 
             switch( doubleClickAction )
             {
@@ -460,7 +490,10 @@ function activate( context )
                 case 'Expand/Collapse':
                     if( node.nodes.length > 0 )
                     {
-                        remembrallTree.setExpanded( node, !remembrallTree.isExpanded( node ), setContext );
+                        remembrallTree.setExpanded( node, !remembrallTree.isExpanded( node ), function()
+                        {
+                            remembrallTree.refresh();
+                        } );
                     }
                     break;
                 default:
@@ -524,6 +557,7 @@ function activate( context )
                 {
                     if( success )
                     {
+                        debug( "Info: Tree exported" );
                         vscode.window.showTextDocument( document );
                     }
                 } );
@@ -548,6 +582,7 @@ function activate( context )
                             {
                                 context.globalState.update( 'remembrall.items', JSON.stringify( nodeData ) ).then( function()
                                 {
+                                    debug( "Info: Tree imported" );
                                     remembrallTree.fetchNodes();
                                     storage.triggerBackup( onLocalDataUpdated );
                                     onLocalDataUpdated();

@@ -41,7 +41,6 @@ class RemembrallDataProvider
     {
         var nodeData = JSON.stringify( utils.cleanNodes( this.itemNodes ) );
         this._context.globalState.update( 'remembrall.items', nodeData );
-        this._onDidChangeTreeData.fire();
     }
 
     setOutputChannel( outputChannel )
@@ -68,14 +67,13 @@ class RemembrallDataProvider
         {
             if( this.itemNodes.length > 0 )
             {
-                this.nodesToGet += this.itemNodes.length;
+                this.nodesToGet = this.itemNodes.length;
                 return this.itemNodes;
             }
             return undefined;
         }
         else if( node.nodes )
         {
-            this.nodesToGet += node.nodes.length;
             return node.nodes;
         }
     }
@@ -89,7 +87,7 @@ class RemembrallDataProvider
     {
         var treeItem = new vscode.TreeItem( node.label );
 
-        treeItem.id = nodeCounter++;
+        treeItem.id = node.id;
         treeItem.tooltip = node.tooltip;
         treeItem.label = node.label;
 
@@ -119,6 +117,11 @@ class RemembrallDataProvider
                     treeItem.label += " (" + node.nodes.length + ")";
                 }
             }
+            else if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Expanded )
+            {
+                this.nodesToGet += node.nodes.length;
+            }
+
             if( treeItem.collapsibleState === vscode.TreeItemCollapsibleState.Expanded )
             {
                 this.expandedNodes++;
@@ -136,10 +139,12 @@ class RemembrallDataProvider
         treeItem.command = { command: "remembrall.onSelected", arguments: [ node ] };
 
         this.nodesToGet--;
+
         if( this.nodesToGet === 0 && this.onTreeRefreshed )
         {
             this.onTreeRefreshed();
         }
+
         return treeItem;
     }
 
@@ -302,8 +307,8 @@ class RemembrallDataProvider
 
             if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'showCollapsedItemCounts' ) === true )
             {
-                this.rebuild();
-                this.refresh( callback );
+                this._onDidChangeTreeData.fire( node );
+                callback();
             }
         }
     }
@@ -384,9 +389,9 @@ class RemembrallDataProvider
 
     find( text, callback, notFound, instance )
     {
-        var result = { found: false };
+        var result = { found: false, instance: instance };
 
-        this.doFind( result, text, callback, instance, this.itemNodes );
+        this.doFind( result, text, callback, this.itemNodes );
 
         if( result.found === false )
         {
@@ -404,7 +409,7 @@ class RemembrallDataProvider
         }
     }
 
-    doFind( result, text, callback, instance, nodes )
+    doFind( result, text, callback, nodes )
     {
         var searchTerm = text.toLowerCase();
 
@@ -412,7 +417,7 @@ class RemembrallDataProvider
         {
             if( !result.found && node.label.toLowerCase().indexOf( searchTerm ) !== -1 )
             {
-                if( instance < 1 )
+                if( result.instance < 1 )
                 {
                     callback( node, false );
                     result.found = true;
@@ -423,12 +428,12 @@ class RemembrallDataProvider
                     {
                         result.firstInstance = node;
                     }
-                    instance--;
+                    result.instance--;
                 }
             }
             if( !result.found && node.nodes )
             {
-                this.doFind( result, text, callback, instance, node.nodes );
+                this.doFind( result, text, callback, node.nodes );
             }
         }, this );
 
