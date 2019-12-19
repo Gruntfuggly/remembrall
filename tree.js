@@ -107,7 +107,7 @@ class RemembrallDataProvider
             }
             else
             {
-                treeItem.collapsibleState = this._context.workspaceState.get( 'remembrall.expandAll' ) ?
+                treeItem.collapsibleState = this._context.workspaceState.get( 'remembrall.expandAll' ) === true ?
                     vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
 
@@ -306,6 +306,11 @@ class RemembrallDataProvider
                 this.refresh( callback );
             }
         }
+    }
+
+    isExpanded( node )
+    {
+        return this._context.workspaceState.get( 'remembrall.expandAll' ) === true || expandedNodes[ node.uniqueId ] === true;
     }
 
     clearExpansionState( callback )

@@ -453,6 +453,12 @@ function activate( context )
                         markAsDone( node );
                     }
                     break;
+                case 'Expand/Collapse':
+                    if( node.nodes.length > 0 )
+                    {
+                        remembrallTree.setExpanded( node, !remembrallTree.isExpanded( node ), setContext );
+                    }
+                    break;
                 default:
                     break;
             }

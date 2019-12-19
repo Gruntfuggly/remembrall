@@ -175,13 +175,15 @@
                     "enum": [
                         "Edit",
                         "Toggle Mark As Done",
+                        "Expand/Collapse",
                         "Nothing"
                     ],
                     "markdownDescription": "What action to take when double clicking items in the tree.",
                     "markdownEnumDescriptions": [
-                        "Edit the item text",
-                        "Toggle the item from new to done and vice versa",
-                        "Do Nothing"
+                        "Edit the item text.",
+                        "Toggle the item from new to done and vice versa.",
+                        "Expand or collapse the current item, if it has children.",
+                        "Do Nothing."
                     ],
                     "default": "Nothing"
                 },
