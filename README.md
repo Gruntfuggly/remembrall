@@ -51,20 +51,32 @@ Move the selected item to the top or bottom of it's list of siblings.
 **remembrall.debug** (default: false)<br/>
 Create a debug channel in the output view.
 
+**remembrall.viewTitle** (default: "Remembrall")<br/>
+Set the title displayed above the tree.
+
 **remembrall.showInExplorer** (default: true)<br/>
-Show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar.
+If true, the view is also shown in the explorer. Set to false if you only want to use the dedicated view in the activity bar.
+
+**remembrall.showCollapsedItemCounts** (default: true)<br/>
+If true, collapsed items show a count of the number of children.
 
 **remembrall.confirmRemove** (default: true)<br/>
-Set to false to disable the remove confirmation prompt.
+Set to false to disable the remove item confirmation prompt.
 
 **remembrall.defaultIcon**<br/>
 Set the default icon to one from the [octicons](https://octicons.github.com/). Used when when creating new items.
+
+**remembrall.moveDoneItemsToBottom** (default: true)<br/>
+When marking an item as done, move it to the bottom of the list. Set to false to keep the item in the same place in the list.
+
+**remembrall.doubleClickAction** (default: "Expand/Collapse")<br/>
+Set what action to take when double clicking items in the tree.
 
 **remembrall.syncEnabled** (default: false)<br/>
 Enable syncing via gist.
 
 **remembrall.syncToken**<br/>
-A github token to allow sync via gist.
+A github token to allow sync via gist (*see* [syncing](#syncing) *below*).
 
 **remembrall.syncGistId**<br/>
 A github gist ID used to store shared settings.

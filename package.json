@@ -153,7 +153,7 @@
                 },
                 "remembrall.showInExplorer": {
                     "type": "boolean",
-                    "markdownDescription": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
+                    "markdownDescription": "If true, the view is also shown in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
                     "default": true
                 },
                 "remembrall.showCollapsedItemCounts": {
@@ -163,34 +163,34 @@
                 },
                 "remembrall.confirmRemove": {
                     "type": "boolean",
-                    "markdownDescription": "Set to false to disable the remove confirmation prompt",
+                    "markdownDescription": "Set to false to disable the remove item confirmation prompt",
                     "default": true
                 },
                 "remembrall.defaultIcon": {
                     "type": "string",
-                    "markdownDescription": "Use this icon from the [octicons](https://octicons.github.com/) set when creating new items."
+                    "markdownDescription": "Set the default icon to one from the [octicons](https://octicons.github.com/). Used when when creating new items."
                 },
                 "remembrall.moveDoneItemsToBottom": {
                     "type": "boolean",
-                    "markdownDescription": "When marking an item as done, move it to the bottom of the list.",
+                    "markdownDescription": "When marking an item as done, move it to the bottom of the list. Set to false to keep the item in the same place in the list.",
                     "default": true
                 },
                 "remembrall.doubleClickAction": {
                     "type": "string",
                     "enum": [
+                        "Expand/Collapse",
                         "Edit",
                         "Toggle Mark As Done",
-                        "Expand/Collapse",
                         "Nothing"
                     ],
-                    "markdownDescription": "What action to take when double clicking items in the tree.",
+                    "markdownDescription": "Set what action to take when double clicking items in the tree.",
                     "markdownEnumDescriptions": [
+                        "Expand or collapse the current item, if it has children.",
                         "Edit the item text.",
                         "Toggle the item from new to done and vice versa.",
-                        "Expand or collapse the current item, if it has children.",
                         "Do Nothing."
                     ],
-                    "default": "Nothing"
+                    "default": "Expand/Collapse"
                 },
                 "remembrall.syncEnabled": {
                     "type": "boolean",
