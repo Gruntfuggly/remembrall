@@ -87,12 +87,8 @@ function activate( context )
         onLocalDataUpdated();
     }
 
-    function refresh()
+    function sync()
     {
-        debug( "Info: Refreshing..." );
-
-        remembrallTree.refresh();
-
         var config = vscode.workspace.getConfiguration( 'remembrall' );
         if( config.get( 'syncEnabled' ) && config.get( 'syncToken' ) )
         {
@@ -105,6 +101,15 @@ function activate( context )
                 reinitializeSync();
             }
         }
+    }
+
+    function refresh()
+    {
+        debug( "Info: Refreshing..." );
+
+        remembrallTree.refresh();
+        sync();
+
     }
 
     function setContext()
@@ -691,7 +696,7 @@ function activate( context )
             storage.setActive( e.focused );
             if( e.focused )
             {
-                refresh();
+                sync();
             }
         } ) );
 
