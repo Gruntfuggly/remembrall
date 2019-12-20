@@ -271,12 +271,12 @@ function sync( callback )
                         }
                         else
                         {
-                            logAndCallback( "Warning: Ignoring out of date remote data", callback );
+                            logAndCallback( "Warning: Ignoring out of date remote data" );
                         }
                     }
                     else
                     {
-                        logAndCallback( "Info: Ignoring unchanged data", callback );
+                        logAndCallback( "Info: Ignoring unchanged data" );
                     }
                 }
 
