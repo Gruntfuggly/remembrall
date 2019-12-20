@@ -377,7 +377,6 @@
         "vscode": "^1.0.0"
     },
     "dependencies": {
-        "gistore": "^0.1.1",
         "octicons": "^8.5.0"
     }
 }
