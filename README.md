@@ -14,7 +14,7 @@ This was created as a simple TODO list organiser, but can be used to store any a
 The following buttons are shown on the tree view title bar:
 
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.png" height="16px" align="center"> Add a new item to the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.png" height="16px" align="center"> Search the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.png" height="16px" align="center"> Search the tree. Double click to find the next instance.<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/refresh.png" height="16px" align="center"> Refresh the tree<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/expand.png" height="16px" align="center"> Expand all the items in the tree<br/>
 <img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/collapse.png" height="16px" align="center"> Collapse all the items in the tree<br/>

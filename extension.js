@@ -13,6 +13,7 @@ function activate( context )
     var outputChannel;
     var lastClickedNode;
     var doubleClickTimer;
+    var findDoubleClickTimer;
     var pendingSelection;
 
     var remembrallTree = new tree.RemembrallDataProvider( context, setContext );
@@ -439,24 +440,36 @@ function activate( context )
 
     function find()
     {
-        vscode.window.showInputBox( { placeHolder: "Search tree...", value: findText } ).then( function( text )
+        if( findDoubleClickTimer )
         {
-            if( text !== undefined )
+            findNext();
+        }
+        else
+        {
+            findDoubleClickTimer = setTimeout( function()
             {
-                findText = text;
-                var node = selectedNode();
-                if( node && node.label.toLowerCase().indexOf( findText.toLowerCase() ) !== -1 )
+                findDoubleClickTimer = undefined;
+            }, 500 );
+
+            vscode.window.showInputBox( { placeHolder: "Search tree...", value: findText } ).then( function( text )
+            {
+                if( text !== undefined )
                 {
-                    findInstance++;
+                    findText = text;
+                    var node = selectedNode();
+                    if( node && node.label.toLowerCase().indexOf( findText.toLowerCase() ) !== -1 )
+                    {
+                        findInstance++;
+                    }
+                    else
+                    {
+                        findInstance = 0;
+                    }
+                    debug( "Info: Searching for " + findText );
+                    remembrallTree.find( findText, found, notFound, findInstance );
                 }
-                else
-                {
-                    findInstance = 0;
-                }
-                debug( "Info: Searching for " + findText );
-                remembrallTree.find( findText, found, notFound, findInstance );
-            }
-        } );
+            } );
+        }
     }
 
     function findNext()
@@ -470,7 +483,6 @@ function activate( context )
 
     function selected( node )
     {
-        // return;
         if( doubleClickTimer && node.id === lastClickedNode.id )
         {
             var doubleClickAction = vscode.workspace.getConfiguration( 'remembrall' ).get( 'doubleClickAction' );
