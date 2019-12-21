@@ -13,20 +13,20 @@ This was created as a simple TODO list organiser, but can be used to store any a
 
 The following buttons are shown on the tree view title bar:
 
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.svg?sanitize=true" height="16px" align="center"> Add a new item to the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.svg?sanitize=true" height="16px" align="center"> Search the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/refresh.svg?sanitize=true" height="16px" align="center"> Refresh the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/expand.svg?sanitize=true" height="16px" align="center"> Expand all the items in the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/collapse.svg?sanitize=true" height="16px" align="center"> Collapse all the items in the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.png" height="16px" align="center"> Add a new item to the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.png" height="16px" align="center"> Search the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/refresh.png" height="16px" align="center"> Refresh the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/expand.png" height="16px" align="center"> Expand all the items in the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/collapse.png" height="16px" align="center"> Collapse all the items in the tree<br/>
 
 Hovering over or selecting items in the tree will show the following buttons:
 
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-up.svg?sanitize=true" height="16px" align="center"> Move item up the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-down.svg?sanitize=true" height="16px" align="center"> Move item down the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/make-child.svg?sanitize=true" height="16px" align="center"> Make the item a child of the item above<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/unparent.svg?sanitize=true" height="16px" align="center"> Move the item out of it's current group<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/edit.svg?sanitize=true" height="16px" align="center"> Modify the text of the item<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/trash.svg?sanitize=true" height="16px" align="center"> Remove the item from the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-up.png" height="16px" align="center"> Move item up the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-down.png" height="16px" align="center"> Move item down the tree<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/make-child.png" height="16px" align="center"> Make the item a child of the item above<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/unparent.png" height="16px" align="center"> Move the item out of it's current group<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/edit.png" height="16px" align="center"> Modify the text of the item<br/>
+<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/trash.png" height="16px" align="center"> Remove the item from the tree<br/>
 
 There is also a context menu providing the following commands:
 
