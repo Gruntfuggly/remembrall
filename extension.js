@@ -109,8 +109,11 @@ function activate( context )
         debug( "Info: Refreshing..." );
 
         remembrallTree.refresh();
-        sync();
 
+        if( vscode.window.focused )
+        {
+            sync();
+        }
     }
 
     function setContext()
