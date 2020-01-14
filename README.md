@@ -61,7 +61,7 @@ If true, the view is also shown in the explorer. Set to false if you only want t
 If true, collapsed items show a count of the number of children.
 
 **remembrall.confirmRemove** (default: true)<br/>
-Set to false to disable the remove item confirmation prompt.
+Set to false to disable the remove item confirmation prompt. *Note: You will still be prompted if the item has children.*
 
 **remembrall.defaultIcon**<br/>
 Set the default icon to one from the [octicons](https://octicons.github.com/). Used when when creating new items.

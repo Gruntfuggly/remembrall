@@ -344,7 +344,7 @@ function activate( context )
 
         if( node )
         {
-            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true )
+            if( vscode.workspace.getConfiguration( 'remembrall' ).get( 'confirmRemove' ) === true || node.nodes.length > 0 )
             {
                 var prompt = "Are you sure you want to remove this item";
                 if( node.nodes.length > 0 )
