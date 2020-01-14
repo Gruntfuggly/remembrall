@@ -1,2 +1,11 @@
-# v1.0.0 - 2017-12-20
+# Remembrall Change Log
+
+## v1.0.1 - 2020-01-14
+
+- Only sync on refresh when window is focused
+- Remove some markdown lint errors from the README.md
+- Always confirm deletion if an item has children
+
+## v1.0.0 - 2019-12-20
+
 - Initial release

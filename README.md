@@ -4,10 +4,9 @@ A simple extension that provides a reorderable, syncable TODO list.
 
 This was created as a simple TODO list organiser, but can be used to store any arbitrary text in a tree. The contents of the tree can be optionally synced with other instances of Code using a github gist.
 
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/screenshot.png">
+![screenshot](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/screenshot.png)
 
 *Note: Sync is done via a secret github gist. These are not public, not discoverable via github, and are not searchable. However, they are not encrypted or protected in any other way. If someone discovers the URL for your gist or you share it with somebody, they will be able to view it's contents. **For this reason, it is recommended that you do not store private or sensitive information in your tree**.*
-
 
 ## Controls
 
@@ -45,7 +44,6 @@ Show the item in a smaller font if you want to show it as done, but not delete i
 **Move To Top/Move To Bottom**<br/>
 Move the selected item to the top or bottom of it's list of siblings.
 
-
 ### Configuration
 
 **remembrall.debug** (default: false)<br/>
@@ -81,13 +79,12 @@ A github token to allow sync via gist (*see* [syncing](#syncing) *below*).
 **remembrall.syncGistId**<br/>
 A github gist ID used to store shared settings.
 
-
 ## Syncing
 
 When syncing is enabled, you'll need to provide a github personal access token:
 
 1. Log in to your github account
-2. Visit https://github.com/settings/tokens
+2. Visit <https://github.com/settings/tokens>
 3. Click the **Generate new token** button
 4. Enter 'remembrall' in the Note field, select the 'Create gists' checkbox, then click the **Generate token** button.
 5. Copy the new personal access token.
@@ -97,13 +94,11 @@ You can use the same personal access token for each instance of Code that you wa
 
 If you have already set up sync from another instance of Code, once the token has been set, Remembrall should automatically find the existing gist and sync it. If this is the initial set up, a new gist will be created and populated with your current tree.
 
-
 ### Troubleshooting
 
 If you see `Request failed with status code 401` then your access token is not valid. Ensure that the token has the *Create gists* scope.
 
 If you see `Request failed with status code 404` then the gist can't be found. Try clearing the `remembrall.syncGistId` setting and refreshing the tree.
-
 
 ## Other Commands
 
@@ -122,7 +117,6 @@ You can install the latest version of the extension via the Visual Studio Market
 ### Source Code
 
 The source code is available on GitHub [here](https://github.com/Gruntfuggly/remembrall).
-
 
 ## Credits
 
