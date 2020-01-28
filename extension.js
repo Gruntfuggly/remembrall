@@ -110,7 +110,7 @@ function activate( context )
 
         remembrallTree.refresh();
 
-        if( vscode.window.focused )
+        if( vscode.window.state.focused )
         {
             sync();
         }
