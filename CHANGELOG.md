@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+## v1.0.2 - 2020-01-28
+
 - Fix sync on startup for focused window
 
 ## v1.0.1 - 2020-01-14
