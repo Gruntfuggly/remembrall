@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+## v1.0.3 - 2020-02-03
+
 - Simplify export function so that it doesn't use a filename
 - Support creation and modification dates in tooltips
 
