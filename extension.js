@@ -561,27 +561,10 @@ function activate( context )
     function exportTree()
     {
         var exported = JSON.stringify( JSON.parse( context.globalState.get( 'remembrall.items' ) ), null, 2 );
-        var newFile = vscode.Uri.parse( 'untitled:' + path.join( os.homedir(), 'remembrall.json' ) );
-        vscode.workspace.openTextDocument( newFile ).then( function( document )
+        vscode.workspace.openTextDocument( { language: 'json', content: exported } ).then( function( document )
         {
-            var edit = new vscode.WorkspaceEdit();
-            edit.delete( newFile, new vscode.Range(
-                document.positionAt( 0 ),
-                document.positionAt( document.getText().length - 1 )
-            ) );
-            return vscode.workspace.applyEdit( edit ).then( function( success )
-            {
-                var edit = new vscode.WorkspaceEdit();
-                edit.insert( newFile, new vscode.Position( 0, 0 ), exported );
-                return vscode.workspace.applyEdit( edit ).then( function( success )
-                {
-                    if( success )
-                    {
-                        debug( "Info: Tree exported" );
-                        vscode.window.showTextDocument( document );
-                    }
-                } );
-            } );
+            debug( "Info: Tree exported" );
+            vscode.window.showTextDocument( document );
         } );
     }
 

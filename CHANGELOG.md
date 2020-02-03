@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+- Simplify export function so that it doesn't use a filename
+
 ## v1.0.2 - 2020-01-28
 
 - Fix sync on startup for focused window
