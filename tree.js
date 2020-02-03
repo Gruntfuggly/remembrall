@@ -85,15 +85,37 @@ class RemembrallDataProvider
 
     getTreeItem( node )
     {
+        function addTimestamp( text, date )
+        {
+            if( date )
+            {
+                treeItem.tooltip += "\n" + text + ": " + date.toLocaleString();
+                var age = ( new Date() - date ) / 1000;
+                var days = Math.floor( age / 86400 );
+                if( days > 0 )
+                {
+                    treeItem.tooltip += ( " (" + days + " day" + ( days > 1 ? "s" : "" ) + " ago)" );
+                }
+            }
+        }
+
         var treeItem = new vscode.TreeItem( node.label );
 
         treeItem.id = node.id;
-        treeItem.tooltip = node.tooltip;
+        treeItem.tooltip = node.label;
         treeItem.label = node.label;
 
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
         treeItem.iconPath = icons.getIcon( this._context, node.icon, node.iconColour );
+
+        if( node.creationTime || node.modifiedTime )
+        {
+            treeItem.tooltip += "\n---";
+
+            addTimestamp( "Created", node.creationTime );
+            addTimestamp( "Modified", node.modifiedTime );
+        }
 
         if( node.nodes && node.nodes.length > 0 )
         {
@@ -165,6 +187,7 @@ class RemembrallDataProvider
         var itemNode = {
             id: nodeCounter++,
             uniqueId: utils.uuidv4(),
+            creationTime: new Date().toISOString(),
             label: item.label,
             done: false,
             icon: vscode.workspace.getConfiguration( 'remembrall' ).get( 'defaultIcon' ),
@@ -196,6 +219,7 @@ class RemembrallDataProvider
         var itemNode = {
             id: nodeCounter++,
             uniqueId: utils.uuidv4(),
+            creationTime: new Date().toISOString(),
             label: item.label,
             done: false,
             nodes: [],

@@ -382,6 +382,7 @@ function activate( context )
                 {
                     debug( "Info: Edited item: " + node.label + " -> " + response );
                     node.label = response;
+                    node.modifiedTime = new Date().toISOString();
                     updateTree();
                 }
             } );

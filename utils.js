@@ -27,6 +27,8 @@ function cleanNodes( nodes )
             iconColour: node.iconColour,
             uniqueId: node.uniqueId,
             done: node.done,
+            creationTime: node.creationTime ? node.creationTime : undefined,
+            modifiedTime: node.modifiedTime ? node.modifiedTime : undefined,
             nodes: [],
         };
         if( node.nodes && node.nodes.length > 0 )
