@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+## v1.0.4 - 2020-02-04
+
 - Add option to disable automatic sync
 
 ## v1.0.3 - 2020-02-03
