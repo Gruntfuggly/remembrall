@@ -12,20 +12,20 @@ This was created as a simple TODO list organiser, but can be used to store any a
 
 The following buttons are shown on the tree view title bar:
 
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/add.png" height="16px" align="center"> Add a new item to the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/search.png" height="16px" align="center"> Search the tree. Double click to find the next instance.<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/refresh.png" height="16px" align="center"> Refresh the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/expand.png" height="16px" align="center"> Expand all the items in the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/collapse.png" height="16px" align="center"> Collapse all the items in the tree<br/>
+![add](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/add.png) Add a new item to the tree<br/>
+![search](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/search.png) Search the tree. Double click to find the next instance.<br/>
+![refresh](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/refresh.png) Refresh the tree<br/>
+![expand](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/expand.png) Expand all the items in the tree<br/>
+![collapse](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/collapse.png) Collapse all the items in the tree<br/>
 
 Hovering over or selecting items in the tree will show the following buttons:
 
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-up.png" height="16px" align="center"> Move item up the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/arrow-down.png" height="16px" align="center"> Move item down the tree<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/make-child.png" height="16px" align="center"> Make the item a child of the item above<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/unparent.png" height="16px" align="center"> Move the item out of it's current group<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/edit.png" height="16px" align="center"> Modify the text of the item<br/>
-<img src="https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/icons/light/trash.png" height="16px" align="center"> Remove the item from the tree<br/>
+![move up](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/arrow-up.png) Move item up the tree<br/>
+![move down](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/arrow-down.png) Move item down the tree<br/>
+![make child](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/make-child.png) Make the item a child of the item above<br/>
+![unparent](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/unparent.png) Move the item out of it's current group<br/>
+![edit](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/edit.png) Modify the text of the item<br/>
+![trash](https://raw.githubusercontent.com/Gruntfuggly/remembrall/master/resources/button-icons/trash.png) Remove the item from the tree<br/>
 
 There is also a context menu providing the following commands:
 

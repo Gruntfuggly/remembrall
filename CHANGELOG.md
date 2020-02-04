@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+- Create button icons for README.md
+
 ## v1.0.4 - 2020-02-04
 
 - Add option to disable automatic sync
