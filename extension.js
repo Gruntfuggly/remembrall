@@ -663,7 +663,7 @@ function activate( context )
                     e.affectsConfiguration( 'remembrall.syncEnabled' ) ||
                     e.affectsConfiguration( 'remembrall.syncToken' ) )
                 {
-                    debug( "Info: sync configuration updated" );
+                    debug( "Info: Sync configuration updated" );
                     reinitializeSync();
                 }
                 else if( e.affectsConfiguration( 'remembrall.syncGistId' ) )
@@ -679,9 +679,10 @@ function activate( context )
                     e.affectsConfiguration( 'remembrall.confirmRemove' ) ||
                     e.affectsConfiguration( 'remembrall.defaultIcon' ) ||
                     e.affectsConfiguration( 'remembrall.moveDoneItemsToBottom' ) ||
+                    e.affectsConfiguration( 'remembrall.autoSync' ) ||
                     e.affectsConfiguration( 'remembrall.doubleClickAction' ) )
                 {
-                    debug( "Info: settings updated" );
+                    debug( "Info: Settings updated" );
                 }
                 else
                 {
@@ -693,7 +694,7 @@ function activate( context )
         context.subscriptions.push( vscode.window.onDidChangeWindowState( function( e )
         {
             storage.setActive( e.focused );
-            if( e.focused )
+            if( e.focused && vscode.workspace.getConfiguration( 'remembrall' ).get( 'autoSync' ) === true )
             {
                 sync();
             }
@@ -702,8 +703,12 @@ function activate( context )
         context.subscriptions.push( outputChannel );
 
         setContext();
-        storage.setActive( true );
-        refresh();
+
+        storage.setActive( vscode.window.state.focused );
+        if( vscode.window.state.focused && vscode.workspace.getConfiguration( 'remembrall' ).get( 'autoSync' ) === true )
+        {
+            refresh();
+        }
     }
 
     register();

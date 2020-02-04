@@ -91,7 +91,7 @@ function initializeSync( currentVersion, callback )
         if( gistId )
         {
             gistore.setId( gistId );
-            logAndCallback( "Info: Reading from gist " + gistId, callback );
+            logAndCallback( "Info: Sync enabled using gist " + gistId, callback );
         }
         else
         {

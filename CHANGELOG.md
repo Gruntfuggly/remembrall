@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+- Add option to disable automatic sync
+
 ## v1.0.3 - 2020-02-03
 
 - Simplify export function so that it doesn't use a filename

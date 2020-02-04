@@ -46,38 +46,41 @@ Move the selected item to the top or bottom of it's list of siblings.
 
 ### Configuration
 
-**remembrall.debug** (default: false)<br/>
-Create a debug channel in the output view.
-
-**remembrall.viewTitle** (default: "Remembrall")<br/>
-Set the title displayed above the tree.
-
-**remembrall.showInExplorer** (default: true)<br/>
-If true, the view is also shown in the explorer. Set to false if you only want to use the dedicated view in the activity bar.
-
-**remembrall.showCollapsedItemCounts** (default: true)<br/>
-If true, collapsed items show a count of the number of children.
+**remembrall.autoSync** (default: true)<br/>
+Normally the extension syncs when Code is started, and whenever the window is activated. If you only want to sync manually (using the Refresh button), set this to false.
 
 **remembrall.confirmRemove** (default: true)<br/>
 Set to false to disable the remove item confirmation prompt. *Note: You will still be prompted if the item has children.*
 
+**remembrall.debug** (default: false)<br/>
+Create a debug channel in the output view.
+
 **remembrall.defaultIcon**<br/>
 Set the default icon to one from the [octicons](https://octicons.github.com/). Used when when creating new items.
-
-**remembrall.moveDoneItemsToBottom** (default: true)<br/>
-When marking an item as done, move it to the bottom of the list. Set to false to keep the item in the same place in the list.
 
 **remembrall.doubleClickAction** (default: "Expand/Collapse")<br/>
 Set what action to take when double clicking items in the tree.
 
+**remembrall.moveDoneItemsToBottom** (default: true)<br/>
+When marking an item as done, move it to the bottom of the list. Set to false to keep the item in the same place in the list.
+
+**remembrall.showCollapsedItemCounts** (default: true)<br/>
+If true, collapsed items show a count of the number of children.
+
+**remembrall.showInExplorer** (default: true)<br/>
+If true, the view is also shown in the explorer. Set to false if you only want to use the dedicated view in the activity bar.
+
 **remembrall.syncEnabled** (default: false)<br/>
 Enable syncing via gist.
+
+**remembrall.syncGistId**<br/>
+A github gist ID used to store shared settings.
 
 **remembrall.syncToken**<br/>
 A github token to allow sync via gist (*see* [syncing](#syncing) *below*).
 
-**remembrall.syncGistId**<br/>
-A github gist ID used to store shared settings.
+**remembrall.viewTitle** (default: "Remembrall")<br/>
+Set the title displayed above the tree.
 
 ## Syncing
 

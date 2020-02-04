@@ -204,6 +204,11 @@
                 "remembrall.syncGistId": {
                     "type": "string",
                     "description": "A github gist ID used to store shared settings"
+                },
+                "remembrall.autoSync": {
+                    "type": "boolean",
+                    "markdownDescription": "Normally the extension syncs when Code is started, and whenever the window is activated. If you only want to sync manually (using the Refresh button), set this to false.",
+                    "default": true
                 }
             }
         },
