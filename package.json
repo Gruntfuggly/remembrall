@@ -3,7 +3,7 @@
     "displayName": "Remembrall",
     "description": "A simple extension that provides a reorderable, syncable todo list",
     "icon": "resources/remembrall.png",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": "MIT",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/remembrall",

@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+## v1.0.5 - 2020-02-05
+
 - Create button icons for README.md
 
 ## v1.0.4 - 2020-02-04
