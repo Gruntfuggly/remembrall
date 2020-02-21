@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+- Add keywords to package.json
+
 ## v1.0.5 - 2020-02-05
 
 - Create button icons for README.md

@@ -13,6 +13,13 @@
     "categories": [
         "Other"
     ],
+    "keywords": [
+        "todo",
+        "tasks",
+        "organizer",
+        "notes",
+        "reminders"
+    ],
     "activationEvents": [
         "*"
     ],
