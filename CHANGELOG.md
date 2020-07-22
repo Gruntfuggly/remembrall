@@ -1,5 +1,7 @@
 # Remembrall Change Log
 
+## v1.0.6 - 2020-07-22
+
 - Bundle the extension
 - Add keywords to package.json
 
