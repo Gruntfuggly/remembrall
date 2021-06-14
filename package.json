@@ -3,7 +3,7 @@
     "displayName": "Remembrall",
     "description": "A simple extension that provides a reorderable, syncable todo list",
     "icon": "resources/remembrall.png",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "license": "MIT",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/remembrall",
@@ -24,6 +24,11 @@
         "*"
     ],
     "main": "./dist/extension",
+    "capabilities": {
+        "untrustedWorkspaces": {
+            "supported": false
+        }
+    },
     "contributes": {
         "viewsContainers": {
             "activitybar": [

@@ -1,5 +1,8 @@
 # Remembrall Change Log
 
+- Apply dependency security fixes
+- Add workspace trust flag
+
 ## v1.0.6 - 2020-07-22
 
 - Bundle the extension
