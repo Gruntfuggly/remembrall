@@ -396,7 +396,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "axios": "^0.21.1",
+        "axios": "^0.21.2",
         "octicons": "^8.5.0"
     },
     "scripts": {
